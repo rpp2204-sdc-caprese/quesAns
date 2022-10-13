@@ -78,7 +78,10 @@ const getQuestions = async(product_id) => {
     .then(async (response) => {
       for(let i = 0; i < response.results.length; i++) {
         let question_id = response.results[i].question_id
-        let query = `select id, body, date_written, answerer_name, reported, helpful from answers where question_id = ${question_id} and reported = false`
+        let query = {
+          text: 'select id, body, date_written, answerer_name, reported, helpful from answers where question_id = $1 and reported = false',
+          values: [question_id]
+        }
         let res = await pool.query(query)
         for(let j = 0; j < res.rows.length; j++) {
           response.results[i].answers[res.rows[j].id] = {
@@ -89,6 +92,16 @@ const getQuestions = async(product_id) => {
             helpfulness: res.rows[j].helpful,
             photos: []
           }
+          let query = {
+            text: 'select url from answers_photos where answer_id = $1',
+            values: [res.rows[j].id],
+            //rowMode: 'array'
+          }
+          //let photos_urls = await pool.query(`select url from answers_photos where answer_id = ${res.rows[j].id}`)
+          let photos_urls = await pool.query(query)
+          photos_urls = photos_urls.rows.map(photo => photo.url)
+          //console.log('PHOTO URLS: ', photos_urls.rows)
+          response.results[i].answers[res.rows[j].id].photos = photos_urls
         }
       }
 
@@ -96,9 +109,12 @@ const getQuestions = async(product_id) => {
       // console.log(response.results[0].answers)
       return response
     })
-    //TODO QUERY PHOTOS!!!!!
-    // .then(response => {
+    // .then(async(response) => {
     //   //query photo url based on answer id
+    //   for()
+    //   for(let answer in response.results.answers) {
+    //     await pool.query(`select url from answers_photos where answer_id = ${answer}`)
+    //   }
     // })
     .catch(err => {
       console.log(err)
