@@ -59,7 +59,12 @@ const getQuestions = async(product_id) => {
     results: []
   }
 
-  return pool.query(`select id, body, date_written, asker_name, reported, helpful from questions where product_id = ${product_id} and reported = false;`)
+  let query = {
+    text: 'select id, body, date_written, asker_name, reported, helpful from questions where product_id = $1 and reported = false',
+    values: [product_id]
+  }
+
+  return pool.query(query)
     .then(res => {
       for(let i = 0; i < res.rows.length; i++) {
         let question = {
