@@ -107,7 +107,7 @@ const getQuestions = async(product_id) => {
 
 }
 
-const getAnswers = async (question_id, page = 0, count = 5) => {
+const getAnswers = async (question_id, page = 1, count = 5) => {
   let response = {
     question: question_id,
     page: page,
