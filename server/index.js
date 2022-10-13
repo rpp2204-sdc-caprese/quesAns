@@ -24,7 +24,7 @@ app.get('/qa/:product_id', (req, res) => {
 
 app.get('/qa/:question_id/answers', (req, res) => {
   let question_id = req.params.question_id
-  getAnswers(question_id)
+  getAnswers(question_id, page, count)
     .then(results => {
       console.log(results)
       res.send(results)
