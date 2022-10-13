@@ -8,8 +8,10 @@ const app = express()
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 
-app.get('/qa/:product_id', (req, res) => {
-  let product_id = req.params.product_id
+app.get('/qa/questions', (req, res) => {
+  let product_id = req.query.product_id
+  let page = req.query.page || 1
+  let count = req.query.count || 5
   getQuestions(product_id)
     .then(results => {
       //console.log('IN INDEX', results.data)
