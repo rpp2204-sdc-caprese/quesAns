@@ -13,7 +13,7 @@ app.get('/qa/:product_id', (req, res) => {
   getQuestions(product_id)
     .then(results => {
       //console.log('IN INDEX', results.data)
-      console.log('IN INDEX', results)
+      console.log(results)
       res.send(results)
     })
     .catch(err => {
@@ -24,9 +24,9 @@ app.get('/qa/:product_id', (req, res) => {
 
 app.get('/qa/:question_id/answers', (req, res) => {
   let question_id = req.params.question_id
-  getAnswers(question_id, page, count)
+  getAnswers(question_id)
     .then(results => {
-      console.log(results)
+      console.log('ANSWER RESPONSE', results)
       res.send(results)
     })
     .catch(err => {
