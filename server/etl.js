@@ -124,7 +124,10 @@ const getAnswers = async (question_id, page = 1, count = 5) => {
     results: []
   }
   //need to fix how variables are put in query
-  let query = `select id as answer_id, body, date_written, answerer_name, helpful from answers where question_id = ${question_id} and reported = false`
+  let query = {
+    text: `select id as answer_id, body, date_written, answerer_name, helpful from answers where question_id = $1 and reported = false`,
+    values: [question_id]
+  }
 
   return pool.query(query)
     .then(results => {
