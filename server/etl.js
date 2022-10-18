@@ -130,10 +130,17 @@ const getAnswers = async (question_id, page = 1, count = 5) => {
   }
 
   return pool.query(query)
-    .then(results => {
+    .then(async(results) => {
       response.results = results.rows
+      for(let i = 0; i < response.results.length; i++) {
+        let query = {
+          text: 'select id, url from answers_photos where answer_id = $1',
+          values: [response.results[i].answer_id]
+        }
+        let photos_urls = await pool.query(query)
+        response.results[i].photos = photos_urls.rows
+      }
       return response
-      //console.log(results.rows)
     })
     .catch(err => {
       console.log(err)
