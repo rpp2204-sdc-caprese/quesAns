@@ -37,6 +37,14 @@ app.get('/qa/questions/:question_id/answers', (req, res) => {
     })
 })
 
+app.post('/qa/questions', (req, res) => {
+  let data = req.body;
+  postQuestion(data)
+    .then(results => {
+      console.log(results)
+    })
+})
+
 app.listen(3000, () => {
   console.log('Server listening on port: 3000')
 })
