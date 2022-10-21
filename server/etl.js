@@ -220,11 +220,28 @@ const postAnswer = (question_id, answer) => {
     })
 }
 
+const updateQuestionHelpfulness = question_id => {
+
+  let query = {
+    text: 'update questions set helpful = helpful + 1 where id = $1',
+    values: [question_id]
+  }
+
+  return pool.query(query)
+    .then(results => {
+      return results
+    })
+    .catch(err => {
+      console.log(err)
+    })
+}
+
 
 module.exports = {
   db,
   getQuestions,
   getAnswers,
   postQuestion,
-  postAnswer
+  postAnswer,
+  updateQuestionHelpfulness
 }
