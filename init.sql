@@ -1,6 +1,6 @@
 
 CREATE TABLE IF NOT EXISTS questions(
-  id INT,
+  id SERIAL,
   product_id int,
   body varchar(255),
   date_written BIGINT,
@@ -17,7 +17,7 @@ DELIMITER ','
 CSV HEADER;
 
 CREATE TABLE IF NOT EXISTS answers(
-  id INT,
+  id SERIAL,
   question_id int,
   body varchar(255),
   date_written BIGINT,
@@ -35,7 +35,7 @@ DELIMITER ','
 CSV HEADER;
 
 CREATE TABLE IF NOT EXISTS answers_photos(
-  id INT,
+  id SERIAL,
   answer_id INT,
   url varchar(510),
   PRIMARY KEY(id),
