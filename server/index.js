@@ -1,7 +1,17 @@
 require('dotenv').config()
 const express = require('express')
-//const { getQuestions } = require('./helpers.js')
-const { db , getQuestions, getAnswers, postQuestion, postAnswer, updateQuestionHelpfulness, reportQuestion } = require('./etl.js')
+
+const {
+  db,
+  getQuestions,
+  getAnswers,
+  postQuestion,
+  postAnswer,
+  updateQuestionHelpfulness,
+  updateAnswerHelpfulness,
+  reportQuestion,
+  reportAnswer
+} = require('./etl.js')
 
 const app = express()
 
@@ -14,7 +24,6 @@ app.get('/qa/questions', (req, res) => {
   let count = req.query.count || 5
   getQuestions(product_id)
     .then(results => {
-      //console.log('IN INDEX', results.data)
       console.log(results)
       res.send(results)
     })
@@ -61,7 +70,6 @@ app.post('/qa/questions/:question_id/answers', (req, res) => {
 
   postAnswer(question_id, answer)
     .then(results => {
-      //console.log('RESULTS IN INDEX', results)
       res.sendStatus(201)
     })
     .catch(err => {
@@ -94,6 +102,17 @@ app.put('/qa/questions/:question_id/report', (req, res) => {
 app.put('/qa/answers/:answer_id/helpful', (req, res) => {
   let answer_id = req.params.answer_id
   updateAnswerHelpfulness(answer_id)
+    .then(results => {
+      res.sendStatus(204)
+    })
+    .catch(err => {
+      console.log(err)
+    })
+})
+
+app.put('/qa/answers/:answer_id/report', (req, res) => {
+  let answer_id = req.params.answer_id
+  reportAnswer(answer_id)
     .then(results => {
       res.sendStatus(204)
     })
