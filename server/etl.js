@@ -268,6 +268,22 @@ const updateAnswerHelpfulness = answer_id => {
     })
 }
 
+const reportAnswer = answer_id => {
+
+  let query = {
+    text: 'update answers set reported = true where id = $1',
+    values: [answer_id]
+  }
+
+  return pool.query(query)
+    .then(results => {
+      return results
+    })
+    .catch(err => {
+      console.log(err)
+    })
+}
+
 
 module.exports = {
   db,
@@ -277,5 +293,6 @@ module.exports = {
   postAnswer,
   updateQuestionHelpfulness,
   reportQuestion,
-  updateAnswerHelpfulness
+  updateAnswerHelpfulness,
+  reportAnswer
 }
