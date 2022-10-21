@@ -37,7 +37,6 @@ app.get('/qa/questions/:question_id/answers', (req, res) => {
   let question_id = req.params.question_id
   getAnswers(question_id)
     .then(results => {
-      console.log('ANSWER RESPONSE', results)
       res.send(results)
     })
     .catch(err => {
