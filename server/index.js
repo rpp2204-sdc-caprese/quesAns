@@ -1,7 +1,7 @@
 require('dotenv').config()
 const express = require('express')
 //const { getQuestions } = require('./helpers.js')
-const { db , getQuestions, getAnswers, postQuestion, postAnswer } = require('./etl.js')
+const { db , getQuestions, getAnswers, postQuestion, postAnswer, updateQuestionHelpfulness } = require('./etl.js')
 
 const app = express()
 
@@ -63,6 +63,17 @@ app.post('/qa/questions/:question_id/answers', (req, res) => {
     .then(results => {
       //console.log('RESULTS IN INDEX', results)
       res.sendStatus(201)
+    })
+    .catch(err => {
+      console.log(err)
+    })
+})
+
+app.put('/qa/questions/:question_id/helpful', (req, res) => {
+  let question_id = req.params.question_id
+  updateQuestionHelpfulness(question_id)
+    .then(results => {
+      res.sendStatus(204)
     })
     .catch(err => {
       console.log(err)
