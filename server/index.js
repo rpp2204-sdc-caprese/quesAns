@@ -1,7 +1,7 @@
 require('dotenv').config()
 const express = require('express')
 //const { getQuestions } = require('./helpers.js')
-const { db , getQuestions, getAnswers } = require('./etl.js')
+const { db , getQuestions, getAnswers, postQuestion } = require('./etl.js')
 
 const app = express()
 
@@ -38,10 +38,14 @@ app.get('/qa/questions/:question_id/answers', (req, res) => {
 })
 
 app.post('/qa/questions', (req, res) => {
-  let data = req.body;
-  postQuestion(data)
+  let question = req.body;
+  postQuestion(question)
     .then(results => {
-      console.log(results)
+      console.log(results.rowCount)
+      res.status(201).send(results.rowCount)
+    })
+    .catch(err => {
+      console.log(err)
     })
 })
 
