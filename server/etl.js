@@ -161,7 +161,7 @@ const postQuestion = async (question) => {
   let reported = false;
   let helpful = 0;
 
-  let query = `insert into questions values()`
+  let query = `insert into questions values( )`
 
 }
 
