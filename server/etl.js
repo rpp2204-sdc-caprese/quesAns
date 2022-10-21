@@ -153,15 +153,28 @@ const getAnswers = async (question_id, page = 1, count = 5) => {
 }
 
 const postQuestion = async (question) => {
+  let product_id = parseInt(question.product_id)
   let body = question.body
+  let date_written = new Date().toISOString();
   let asker_name = question.name
   let asker_email = question.email
-  let product_id = question.product_id
-  let date_written = new Date().toISOString();
   let reported = false;
   let helpful = 0;
 
-  let query = `insert into questions values( )`
+  let query = {
+    text: `insert into questions(product_id, body, date_written, asker_name, asker_email, reported, helpful) values($1, $2, $3, $4, $5, $6, $7)`,
+    values: [product_id, body, date_written, asker_name, asker_email, reported, helpful]
+  }
+
+  return pool.query(query)
+           .then(results => {
+             //console.log('RESULT AFTER QUERY', results)
+             return results
+           })
+           .catch(err => {
+             console.log(err)
+           })
+
 
 }
 
@@ -169,5 +182,6 @@ const postQuestion = async (question) => {
 module.exports = {
   db,
   getQuestions,
-  getAnswers
+  getAnswers,
+  postQuestion
 }
