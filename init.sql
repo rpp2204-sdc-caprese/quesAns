@@ -1,4 +1,4 @@
--- NEED TO ADD NOT NULLS TO FIELDS
+-- Need to figure out relative path for file copy
 CREATE TABLE IF NOT EXISTS questions(
   id SERIAL,
   product_id int not null,
