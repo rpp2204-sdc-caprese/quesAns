@@ -52,10 +52,15 @@ ALTER COLUMN date_written
 TYPE varchar
 USING to_char(to_timestamp(date_written/1000), 'YYYY-MM-DD"T"HH24:MI:SS"Z"');
 
+ALTER SEQUENCE questions_id_seq RESTART WITH 3518964;
+
 ALTER TABLE answers
 ALTER COLUMN date_written
 TYPE varchar
 USING to_char(to_timestamp(date_written/1000), 'YYYY-MM-DD"T"HH24:MI:SS"Z"');
+
+ALTER SEQUENCE answers_id_seq RESTART WITH 6879307;
+ALTER SEQUENCE answers_photos_id_seq RESTART WITH 2063760;
 
 CREATE INDEX idx_questions_product_id ON questions(product_id, reported);
 CREATE INDEX idx_answers_question_id ON answers(question_id, reported);
