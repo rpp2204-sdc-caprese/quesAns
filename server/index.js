@@ -1,7 +1,7 @@
 require('dotenv').config()
 const express = require('express')
 //const { getQuestions } = require('./helpers.js')
-const { db , getQuestions, getAnswers, postQuestion, postAnswer, updateQuestionHelpfulness } = require('./etl.js')
+const { db , getQuestions, getAnswers, postQuestion, postAnswer, updateQuestionHelpfulness, reportQuestion } = require('./etl.js')
 
 const app = express()
 
@@ -72,6 +72,28 @@ app.post('/qa/questions/:question_id/answers', (req, res) => {
 app.put('/qa/questions/:question_id/helpful', (req, res) => {
   let question_id = req.params.question_id
   updateQuestionHelpfulness(question_id)
+    .then(results => {
+      res.sendStatus(204)
+    })
+    .catch(err => {
+      console.log(err)
+    })
+})
+
+app.put('/qa/questions/:question_id/report', (req, res) => {
+  let question_id = req.params.question_id
+  reportQuestion(question_id)
+    .then(results => {
+      res.sendStatus(204)
+    })
+    .catch(err => {
+      console.log(err)
+    })
+})
+
+app.put('/qa/answers/:answer_id/helpful', (req, res) => {
+  let answer_id = req.params.answer_id
+  updateAnswerHelpfulness(answer_id)
     .then(results => {
       res.sendStatus(204)
     })
