@@ -12,46 +12,12 @@ const db = async () => {
       password: PASSWORD
     })
     await pool.connect()
-    //transformDate();
-    //await getQuestions(5000);
-    //pool.end()
   } catch (err) {
     console.log(err)
   }
 }
 
 db();
-
-// const transformDate = (date) => {
-//   //return dateArray.map(date => {
-//     return new Date(parseInt(date)).toISOString()
-//  // })
-// }
-
-//TRANSFORM
-//filter out reported questions, WHERE reported = false
-//transform ms dates to iso strings, ALTER ....
-//dont need to send back asker_email
-
-
-
-const transformDate = async() => {
-  pool
-    //.query('SELECT date_written FROM questions WHERE id < 100')
-    .query('ALTER TABLE questions ALTER COLUMN date_written TYPE TIMESTAMP WITH TIME ZONE USING to_timestamp(date_written / 1000)')
-    //.query('SELECT * from questions WHERE reported = false LIMIT 10')
-    //.query('SELECT to_timestamp(date_written / 1000) FROM questions WHERE product_id = 71701 LIMIT 10')
-    .then(res => {
-      console.log('RESULTS: ', res.rows)
-      //console.log('TYPE: ', typeof res)
-      // let transformed = transformDate(res.rows)
-      // console.log(transformed)
-    })
-    .catch(err => {
-      console.log(err)
-    })
-
-}
 
 const getQuestions = async(product_id) => {
   let response = {
@@ -70,7 +36,6 @@ const getQuestions = async(product_id) => {
         let question = {
           question_id: res.rows[i].id,
           question_body: res.rows[i].body,
-          //question_date: new Date(parseInt(res.rows[i].date_written)).toISOString(),
           question_date: res.rows[i].date_written,
           asker_name: res.rows[i].asker_name,
           question_helpfulness: res.rows[i].helpful,
@@ -78,8 +43,6 @@ const getQuestions = async(product_id) => {
           answers: {}
         }
         response.results.push(question)
-        //console.log(typeof question.question_date)
-        //console.log(new Date(parseInt(question.question_date)).toISOString())
       }
       return response
     })
@@ -95,7 +58,6 @@ const getQuestions = async(product_id) => {
           response.results[i].answers[res.rows[j].id] = {
             id: res.rows[j].id,
             body: res.rows[j].body,
-            //date: new Date(parseInt(res.rows[j].date_written)).toISOString(),
             date: res.rows[j].date_written,
             answerer_name: res.rows[j].answerer_name,
             helpfulness: res.rows[j].helpful,
@@ -168,7 +130,6 @@ const postQuestion = async (question) => {
 
   return pool.query(query)
     .then(results => {
-      //console.log('RESULT AFTER QUERY', results)
       return results
     })
     .catch(err => {
