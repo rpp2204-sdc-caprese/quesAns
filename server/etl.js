@@ -167,15 +167,57 @@ const postQuestion = async (question) => {
   }
 
   return pool.query(query)
-           .then(results => {
-             //console.log('RESULT AFTER QUERY', results)
-             return results
-           })
-           .catch(err => {
-             console.log(err)
-           })
+    .then(results => {
+      //console.log('RESULT AFTER QUERY', results)
+      return results
+    })
+    .catch(err => {
+      console.log(err)
+    })
+}
 
+const postAnswer = (question_id, answer) => {
+  let body = answer.body
+  let date_written = new Date().toISOString()
+  let name = answer.name
+  let email = answer.email
+  let photos = answer.rawPhotos
+  let reported = false
+  let helpful = 0
+  console.log(body, name, email, photos)
 
+  let answerQuery = {
+    text: 'insert into answers(question_id, body, date_written, answerer_name, answerer_email, reported, helpful) values($1, $2, $3, $4, $5, $6, $7) returning id',
+    values: [question_id, body, date_written, name, email, reported, helpful]
+  }
+
+  return pool.query(answerQuery)
+    .then(results => {
+      let answer_id = results.rows[0].id
+      return answer_id
+    })
+    .then(answer_id => {
+      let photoQueries = []
+      for(let i = 0; i < photos.length; i++) {
+        let photoQuery = {
+          text: 'insert into answers_photos(answer_id, url) values($1, $2)',
+          values: [answer_id, photos[i]]
+        }
+        photoQueries.push(pool.query(photoQuery))
+      }
+
+      return Promise.all(photoQueries)
+        .then(results => {
+          console.log('AFTER PROMISE ALL: ', results)
+          return results
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    })
+    .catch(err => {
+      console.log(err)
+    })
 }
 
 
@@ -183,5 +225,6 @@ module.exports = {
   db,
   getQuestions,
   getAnswers,
-  postQuestion
+  postQuestion,
+  postAnswer
 }
