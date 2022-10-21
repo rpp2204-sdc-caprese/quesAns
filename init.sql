@@ -50,14 +50,14 @@ CSV HEADER;
 ALTER TABLE questions
 ALTER COLUMN date_written
 TYPE varchar
-USING to_char(to_timestamp(date_written/1000), 'YYYY-MM-DD"T"HH24:MI:SS"Z"');
+USING to_char(to_timestamp(date_written/1000), 'YYYY-MM-DD"T"HH24:MI:SS.SSS"Z"');
 
 ALTER SEQUENCE questions_id_seq RESTART WITH 3518964;
 
 ALTER TABLE answers
 ALTER COLUMN date_written
 TYPE varchar
-USING to_char(to_timestamp(date_written/1000), 'YYYY-MM-DD"T"HH24:MI:SS"Z"');
+USING to_char(to_timestamp(date_written/1000), 'YYYY-MM-DD"T"HH24:MI:SS.SSS"Z"');
 
 ALTER SEQUENCE answers_id_seq RESTART WITH 6879307;
 ALTER SEQUENCE answers_photos_id_seq RESTART WITH 2063760;
