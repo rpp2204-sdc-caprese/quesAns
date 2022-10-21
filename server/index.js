@@ -1,7 +1,7 @@
 require('dotenv').config()
 const express = require('express')
 //const { getQuestions } = require('./helpers.js')
-const { db , getQuestions, getAnswers, postQuestion } = require('./etl.js')
+const { db , getQuestions, getAnswers, postQuestion, postAnswer } = require('./etl.js')
 
 const app = express()
 
@@ -43,6 +43,26 @@ app.post('/qa/questions', (req, res) => {
     .then(results => {
       console.log(results.rowCount)
       res.status(201).send(results.rowCount)
+    })
+    .catch(err => {
+      console.log(err)
+    })
+})
+
+app.post('/qa/questions/:question_id/answers', (req, res) => {
+  let question_id = parseInt(req.params.question_id)
+
+  let answer;
+  if(typeof req.body.data !== 'object') {
+    answer = JSON.parse(req.body.data)
+  } else {
+    answer = req.body.data
+  }
+
+  postAnswer(question_id, answer)
+    .then(results => {
+      //console.log('RESULTS IN INDEX', results)
+      res.sendStatus(201)
     })
     .catch(err => {
       console.log(err)
