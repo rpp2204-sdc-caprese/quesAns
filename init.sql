@@ -1,13 +1,13 @@
-
+-- NEED TO ADD NOT NULLS TO FIELDS
 CREATE TABLE IF NOT EXISTS questions(
   id SERIAL,
-  product_id int,
-  body varchar(255),
-  date_written BIGINT,
-  asker_name varchar(255),
-  asker_email varchar(255),
-  reported BOOLEAN,
-  helpful int,
+  product_id int not null,
+  body varchar(255) not null,
+  date_written BIGINT not null,
+  asker_name varchar(255) not null,
+  asker_email varchar(255) not null,
+  reported BOOLEAN not null,
+  helpful int not null,
   PRIMARY KEY(id)
 );
 
@@ -18,13 +18,13 @@ CSV HEADER;
 
 CREATE TABLE IF NOT EXISTS answers(
   id SERIAL,
-  question_id int,
-  body varchar(255),
-  date_written BIGINT,
-  answerer_name varchar(255),
-  answerer_email varchar(255),
-  reported BOOLEAN,
-  helpful int,
+  question_id int not null,
+  body varchar(255) not null,
+  date_written BIGINT not null,
+  answerer_name varchar(255) not null,
+  answerer_email varchar(255) not null,
+  reported BOOLEAN not null,
+  helpful int not null,
   PRIMARY KEY(id),
   FOREIGN KEY(question_id) REFERENCES questions(id)
 );
@@ -36,8 +36,8 @@ CSV HEADER;
 
 CREATE TABLE IF NOT EXISTS answers_photos(
   id SERIAL,
-  answer_id INT,
-  url varchar(510),
+  answer_id INT not null,
+  url varchar(510) not null,
   PRIMARY KEY(id),
   FOREIGN KEY(answer_id) REFERENCES answers(id)
 );
