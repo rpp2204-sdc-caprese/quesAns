@@ -1,5 +1,7 @@
 require('dotenv').config()
 const PASSWORD = process.env.PASSWORD
+const USER = process.env.DB_USER
+const DB = process.env.DB_NAME
 const { Pool } = require('pg')
 
 let pool;
@@ -7,8 +9,8 @@ let pool;
 const db = async () => {
   try {
     pool = new Pool({
-      user: 'postgres',
-      database: 'sdc',
+      user: USER,
+      database: DB,
       password: PASSWORD
     })
     await pool.connect()
