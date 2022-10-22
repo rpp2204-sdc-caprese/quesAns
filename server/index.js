@@ -1,4 +1,5 @@
 require('dotenv').config()
+const PORT = process.env.PORT
 const express = require('express')
 
 const {
@@ -120,8 +121,8 @@ app.put('/qa/answers/:answer_id/report', (req, res) => {
     })
 })
 
-app.listen(3000, () => {
-  console.log('Server listening on port: 3000')
+app.listen(PORT, () => {
+  console.log(`Server listening on port: ${PORT}`)
 })
 
 
