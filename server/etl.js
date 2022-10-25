@@ -21,15 +21,16 @@ const db = async () => {
 
 db();
 
-const getQuestions = async(product_id) => {
+const getQuestions = async(product_id, count, page) => {
   let response = {
     product_id: product_id,
     results: []
   }
+  page = page - 1
 
   let query = {
-    text: 'select id, body, date_written, asker_name, reported, helpful from questions where product_id = $1 and reported = false',
-    values: [product_id]
+    text: 'select id, body, date_written, asker_name, reported, helpful from questions where product_id = $1 and reported = false limit $2 offset $3',
+    values: [product_id, count, page]
   }
 
   return pool.query(query)
