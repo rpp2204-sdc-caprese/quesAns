@@ -26,10 +26,10 @@ const getQuestions = async(product_id, count, page) => {
     product_id: product_id,
     results: []
   }
-
+  let offset = (page - 1) * count
   let query = {
     text: 'select id, body, date_written, asker_name, reported, helpful from questions where product_id = $1 and reported = false limit $2 offset $3',
-    values: [product_id, count, page]
+    values: [product_id, count, offset]
   }
 
   return pool.query(query)
@@ -91,10 +91,11 @@ const getAnswers = async (question_id) => {
     count: count,
     results: []
   }
+  let offset = (page - 1) * count
 
   let query = {
     text: `select id as answer_id, body, date_written as date, answerer_name, helpful as helpfulness from answers where question_id = $1 and reported = false limit $2 offset $3`,
-    values: [question_id, count, page]
+    values: [question_id, count, offset]
   }
 
   return pool.query(query)
