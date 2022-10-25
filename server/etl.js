@@ -93,8 +93,8 @@ const getAnswers = async (question_id) => {
   }
 
   let query = {
-    text: `select id as answer_id, body, date_written as date, answerer_name, helpful as helpfulness from answers where question_id = $1 and reported = false`,
-    values: [question_id]
+    text: `select id as answer_id, body, date_written as date, answerer_name, helpful as helpfulness from answers where question_id = $1 and reported = false limit $2 offset $3`,
+    values: [question_id, count, page]
   }
 
   return pool.query(query)
