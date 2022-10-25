@@ -23,7 +23,7 @@ app.get('/qa/questions', (req, res) => {
   let product_id = req.query.product_id
   let page = req.query.page || 1
   let count = req.query.count || 5
-  getQuestions(product_id)
+  getQuestions(product_id, count, page)
     .then(results => {
       console.log(results)
       res.send(results)
