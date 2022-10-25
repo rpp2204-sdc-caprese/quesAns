@@ -26,7 +26,6 @@ const getQuestions = async(product_id, count, page) => {
     product_id: product_id,
     results: []
   }
-  page = page - 1
 
   let query = {
     text: 'select id, body, date_written, asker_name, reported, helpful from questions where product_id = $1 and reported = false limit $2 offset $3',
@@ -85,7 +84,7 @@ const getQuestions = async(product_id, count, page) => {
 
 }
 
-const getAnswers = async (question_id, page = 1, count = 5) => {
+const getAnswers = async (question_id) => {
   let response = {
     question: question_id,
     page: page,
