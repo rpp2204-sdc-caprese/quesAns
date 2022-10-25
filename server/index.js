@@ -21,8 +21,8 @@ app.use(express.urlencoded({extended: true}))
 
 app.get('/qa/questions', (req, res) => {
   let product_id = req.query.product_id
-  let page = req.query.page || 1
   let count = req.query.count || 5
+  let page = req.query.page || 1
   getQuestions(product_id, count, page)
     .then(results => {
       console.log(results)
@@ -36,7 +36,9 @@ app.get('/qa/questions', (req, res) => {
 
 app.get('/qa/questions/:question_id/answers', (req, res) => {
   let question_id = req.params.question_id
-  getAnswers(question_id)
+  let count = req.query.count || 1
+  let page = req.query.page || 5
+  getAnswers(question_id, count, page)
     .then(results => {
       res.send(results)
     })
