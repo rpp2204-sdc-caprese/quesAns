@@ -27,56 +27,97 @@ const getQuestions = async(product_id, count, page) => {
     results: []
   }
   let offset = (page - 1) * count
+  // let query = {
+  //   text: 'select id, body, date_written, asker_name, reported, helpful from questions where product_id = $1 and reported = false limit $2 offset $3',
+  //   values: [product_id, count, offset]
+  // }
   let query = {
-    text: 'select id, body, date_written, asker_name, reported, helpful from questions where product_id = $1 and reported = false limit $2 offset $3',
+    text: `SELECT
+              q.id AS question_id,
+              q.body AS question_body,
+              q.date_written AS question_date,
+              q.asker_name,
+              q.helpful AS question_helpfulness,
+              q.reported,
+              a.id,
+              a.body,
+              a.date_written AS date,
+              a.answerer_name,
+              a.helpful AS helpfulness,
+              url
+          FROM
+              questions q
+          LEFT JOIN
+              answers a
+          ON
+              a.question_id = q.id
+            AND
+              a.reported = FALSE
+          LEFT JOIN
+              answers_photos
+          ON
+              answer_id = a.id
+          WHERE
+              q.product_id = $1
+            AND
+              q.reported = FALSE
+          ORDER BY
+              q.id
+          LIMIT
+              $2
+          OFFSET
+              $3`,
     values: [product_id, count, offset]
   }
 
   return pool.query(query)
-    .then(res => {
-      for(let i = 0; i < res.rows.length; i++) {
-        let question = {
-          question_id: res.rows[i].id,
-          question_body: res.rows[i].body,
-          question_date: res.rows[i].date_written,
-          asker_name: res.rows[i].asker_name,
-          question_helpfulness: res.rows[i].helpful,
-          reported: res.rows[i].reported,
-          answers: {}
-        }
-        response.results.push(question)
-      }
-      return response
+    .then(results => {
+      console.log(results.rows)
     })
-    .then(async (response) => {
-      for(let i = 0; i < response.results.length; i++) {
-        let question_id = response.results[i].question_id
-        let query = {
-          text: 'select id, body, date_written, answerer_name, reported, helpful from answers where question_id = $1 and reported = false',
-          values: [question_id]
-        }
-        let res = await pool.query(query)
-        for(let j = 0; j < res.rows.length; j++) {
-          response.results[i].answers[res.rows[j].id] = {
-            id: res.rows[j].id,
-            body: res.rows[j].body,
-            date: res.rows[j].date_written,
-            answerer_name: res.rows[j].answerer_name,
-            helpfulness: res.rows[j].helpful,
-            photos: []
-          }
-          let query = {
-            text: 'select url from answers_photos where answer_id = $1',
-            values: [res.rows[j].id],
-          }
-          let photos_urls = await pool.query(query)
-          photos_urls = photos_urls.rows.map(photo => photo.url)
-          response.results[i].answers[res.rows[j].id].photos = photos_urls
-        }
-      }
+    // .then(res => {
+    //   for(let i = 0; i < res.rows.length; i++) {
+    //     let question = {
+    //       question_id: res.rows[i].id,
+    //       question_body: res.rows[i].body,
+    //       question_date: res.rows[i].date_written,
+    //       asker_name: res.rows[i].asker_name,
+    //       question_helpfulness: res.rows[i].helpful,
+    //       reported: res.rows[i].reported,
+    //       answers: {}
+    //     }
+    //     response.results.push(question)
+    //   }
+    //   return response
+    // })
+    // .then(async (response) => {
+    //   for(let i = 0; i < response.results.length; i++) {
+    //     let question_id = response.results[i].question_id
+    //     let query = {
+    //       text: 'select id, body, date_written, answerer_name, reported, helpful from answers where question_id = $1 and reported = false',
+    //       values: [question_id]
+    //     }
+    //     let res = await pool.query(query)
+    //     for(let j = 0; j < res.rows.length; j++) {
+    //       response.results[i].answers[res.rows[j].id] = {
+    //         id: res.rows[j].id,
+    //         body: res.rows[j].body,
+    //         date: res.rows[j].date_written,
+    //         answerer_name: res.rows[j].answerer_name,
+    //         helpfulness: res.rows[j].helpful,
+    //         photos: []
+    //       }
+    //       let query = {
+    //         text: 'select url from answers_photos where answer_id = $1',
+    //         values: [res.rows[j].id],
+    //       }
+    //       let photos_urls = await pool.query(query)
+    //       photos_urls = photos_urls.rows.map(photo => photo.url)
+    //       response.results[i].answers[res.rows[j].id].photos = photos_urls
+    //     }
+    //   }
 
-      return response
-    })
+    //   return response
+    // })
     .catch(err => {
       console.log(err)
     })
