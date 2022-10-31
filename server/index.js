@@ -3,7 +3,6 @@ const PORT = process.env.PORT
 const express = require('express')
 
 const {
-  db,
   getQuestions,
   getAnswers,
   postQuestion,
@@ -12,40 +11,14 @@ const {
   updateAnswerHelpfulness,
   reportQuestion,
   reportAnswer
-} = require('./etl.js')
+} = require('./controllers.js')
 
 const app = express()
 
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 
-app.get('/qa/questions', (req, res) => {
-  let product_id = req.query.product_id
-  //console.log('PI: ', typeof product_id)
-  let count = req.query.count || 5
-  let page = req.query.page || 1
-
-  if(product_id === undefined || parseInt(product_id) < 0 || product_id.length === 0) {
-    res.status(404).send('MUST HAVE VALID PRODUCT ID')
-  } else {
-
-    getQuestions(product_id, count, page)
-      .then(results => {
-        console.log(results)
-        if(results === undefined) {
-          res.status(404).send('results')
-        } else {
-
-          res.status(200).send(results)
-        }
-      })
-      .catch(err => {
-        console.log(err)
-        res.send(err)
-      })
-  }
-
-})
+app.get('/qa/questions', getQuestions)
 
 app.get('/qa/questions/:question_id/answers', (req, res) => {
   let question_id = req.params.question_id
