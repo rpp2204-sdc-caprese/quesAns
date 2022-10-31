@@ -20,20 +20,7 @@ app.use(express.urlencoded({extended: true}))
 
 app.get('/qa/questions', getQuestions)
 
-app.get('/qa/questions/:question_id/answers', (req, res) => {
-  let question_id = req.params.question_id
-  let count = req.query.count || 5
-  let page = req.query.page || 1
-
-  getAnswers(question_id, count, page)
-    .then(results => {
-      res.send(results)
-    })
-    .catch(err => {
-      console.log(err)
-      res.send(err)
-    })
-})
+app.get('/qa/questions/:question_id/answers', getAnswers)
 
 app.post('/qa/questions', (req, res) => {
   let question = req.body;
