@@ -21,7 +21,7 @@ app.use(express.urlencoded({extended: true}))
 
 app.get('/qa/questions', (req, res) => {
   let product_id = req.query.product_id
-  console.log('PI: ', typeof product_id)
+  //console.log('PI: ', typeof product_id)
   let count = req.query.count || 5
   let page = req.query.page || 1
 
