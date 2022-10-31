@@ -75,27 +75,32 @@ const getQuestions = async(req, res) => {
           response.results[i].answers[res.rows[j].id].photos = photos_urls
         }
       }
-
       return response
     })
     .then(results => {
       console.log(results)
       if(results === undefined) {
         throw new Error('Server Error')
-      } else {
-        res.status(200).send(results)
+        return;
       }
+      res.status(200).send(results)
     })
     .catch(err => {
       console.log(err)
       res.status(500).send(err)
     })
-    // .catch(err => {
-    //   console.log(err)
-    // })
 }
 
-const getAnswers = async (question_id) => {
+const getAnswers = async (req, res) => {
+
+  let question_id = req.params.question_id
+  let count = req.query.count || 5
+  let page = req.query.page || 1
+
+  if(question_id === undefined || parseInt(question_id) < 0 || question_id.length === 0) {
+    return res.status(404).send('MUST HAVE VALID QUESTION ID')
+  }
+
   let response = {
     question: question_id,
     page: page,
@@ -122,8 +127,11 @@ const getAnswers = async (question_id) => {
       }
       return response
     })
+    .then(response => {
+      res.status(200).send(response)
+    })
     .catch(err => {
-      console.log(err)
+      res.status(500).send(err)
     })
 
 }
