@@ -12,7 +12,16 @@ const pool = new Pool({
 pool.connect()
 
 
-const getQuestions = async(product_id, count, page) => {
+const getQuestions = async(req, res) => {
+
+  let product_id = req.query.product_id
+  let count = req.query.count || 5
+  let page = req.query.page || 1
+
+  if(product_id === undefined || parseInt(product_id) < 0 || product_id.length === 0) {
+    return res.status(404).send('MUST HAVE VALID PRODUCT ID')
+  }
+
   let response = {
     product_id: product_id,
     results: []
@@ -69,9 +78,21 @@ const getQuestions = async(product_id, count, page) => {
 
       return response
     })
+    .then(results => {
+      console.log(results)
+      if(results === undefined) {
+        throw new Error('Server Error')
+      } else {
+        res.status(200).send(results)
+      }
+    })
     .catch(err => {
       console.log(err)
+      res.status(500).send(err)
     })
+    // .catch(err => {
+    //   console.log(err)
+    // })
 }
 
 const getAnswers = async (question_id) => {
