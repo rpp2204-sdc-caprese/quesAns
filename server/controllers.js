@@ -11,7 +11,9 @@ const pool = new Pool({
 })
 pool.connect()
 
-const handleResponse = (res, data) => res.status(200).send(data)
+const handleGetResponse = (res, data) => res.status(200).send(data)
+const handlePostResponse = (res, data) => res.status(201).send(data)
+const handlePutResponse = (res, data) => res.status(204).send(data)
 const handleError = (res, err) => res.status(500).send(err)
 
 
@@ -86,7 +88,7 @@ const getQuestions = async(req, res) => {
         throw new Error('Server Error')
         return;
       }
-      handleResponse(res, results)
+      handleGetResponse(res, results)
       //res.status(200).send(results)
     })
     .catch(err => {
@@ -132,7 +134,7 @@ const getAnswers = async (req, res) => {
       return response
     })
     .then(response => {
-      handleResponse(res, response)
+      handleGetResponse(res, response)
     })
     .catch(err => {
       handleError(res, err)
@@ -157,14 +159,24 @@ const postQuestion = async (req, res) => {
 
   return pool.query(query)
     .then(results => {
-      res.status(201).send(results.rowCount)
+      handlePostResponse(res, results.rowCount)
     })
     .catch(err => {
       res.status(500).send(err)
     })
 }
 
-const postAnswer = (question_id, answer) => {
+const postAnswer = (req, res) => {
+
+  let question_id = parseInt(req.params.question_id)
+
+  let answer;
+  if(typeof req.body.data !== 'object') {
+    answer = JSON.parse(req.body.data)
+  } else {
+    answer = req.body.data
+  }
+
   let body = answer.body
   let date_written = new Date().toISOString()
   let name = answer.name
@@ -195,21 +207,18 @@ const postAnswer = (question_id, answer) => {
       }
 
       return Promise.all(photoQueries)
-        .then(results => {
-          console.log('AFTER PROMISE ALL: ', results)
-          return results
-        })
-        .catch(err => {
-          console.log(err)
-        })
+    })
+    .then(results => {
+      console.log('AFTER PROMISE ALL: ', results)
+      handlePostResponse(res, results)
     })
     .catch(err => {
-      console.log(err)
+      handleError(res, err)
     })
 }
 
-const updateQuestionHelpfulness = question_id => {
-
+const updateQuestionHelpfulness = (req, res) => {
+  let question_id = req.params.question_id
   let query = {
     text: 'update questions set helpful = helpful + 1 where id = $1',
     values: [question_id]
@@ -217,15 +226,15 @@ const updateQuestionHelpfulness = question_id => {
 
   return pool.query(query)
     .then(results => {
-      return results
+      handlePutResponse(res, results)
     })
     .catch(err => {
-      console.log(err)
+      handleError(res, err)
     })
 }
 
-const reportQuestion = question_id => {
-
+const reportQuestion = (req, res) => {
+  let question_id = req.params.question_id
   let query = {
     text: 'update questions set reported = true where id = $1',
     values: [question_id]
@@ -233,15 +242,15 @@ const reportQuestion = question_id => {
 
   return pool.query(query)
     .then(results => {
-      return results
+      handlePutResponse(res, results)
     })
     .catch(err => {
-      console.log(err)
+      handleError(res, err)
     })
 }
 
-const updateAnswerHelpfulness = answer_id => {
-
+const updateAnswerHelpfulness = (req, res) => {
+  let answer_id = req.params.answer_id
   let query = {
     text: 'update answers set helpful = helpful + 1 where id = $1',
     values: [answer_id]
@@ -249,15 +258,15 @@ const updateAnswerHelpfulness = answer_id => {
 
   return pool.query(query)
     .then(results => {
-      return results
+      handlePutResponse(res, results)
     })
     .catch(err => {
-      console.log(err)
+      handleError(res, err)
     })
 }
 
-const reportAnswer = answer_id => {
-
+const reportAnswer = (req, res) => {
+  let answer_id = req.params.answer_id
   let query = {
     text: 'update answers set reported = true where id = $1',
     values: [answer_id]
@@ -265,10 +274,10 @@ const reportAnswer = answer_id => {
 
   return pool.query(query)
     .then(results => {
-      return results
+      handlePutResponse(res, results)
     })
     .catch(err => {
-      console.log(err)
+      handleError(res, err)
     })
 }
 
