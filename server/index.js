@@ -22,80 +22,17 @@ app.get('/qa/questions', getQuestions)
 
 app.get('/qa/questions/:question_id/answers', getAnswers)
 
-app.post('/qa/questions', (req, res) => {
-  let question = req.body;
-  postQuestion(question)
-    .then(results => {
-      console.log(results.rowCount)
-      res.status(201).send(results.rowCount)
-    })
-    .catch(err => {
-      console.log(err)
-    })
-})
+app.post('/qa/questions', postQuestion)
 
-app.post('/qa/questions/:question_id/answers', (req, res) => {
-  let question_id = parseInt(req.params.question_id)
+app.post('/qa/questions/:question_id/answers', postAnswer)
 
-  let answer;
-  if(typeof req.body.data !== 'object') {
-    answer = JSON.parse(req.body.data)
-  } else {
-    answer = req.body.data
-  }
+app.put('/qa/questions/:question_id/helpful', updateQuestionHelpfulness)
 
-  postAnswer(question_id, answer)
-    .then(results => {
-      res.sendStatus(201)
-    })
-    .catch(err => {
-      console.log(err)
-    })
-})
+app.put('/qa/questions/:question_id/report', reportQuestion)
 
-app.put('/qa/questions/:question_id/helpful', (req, res) => {
-  let question_id = req.params.question_id
-  updateQuestionHelpfulness(question_id)
-    .then(results => {
-      res.sendStatus(204)
-    })
-    .catch(err => {
-      console.log(err)
-    })
-})
+app.put('/qa/answers/:answer_id/helpful', updateAnswerHelpfulness)
 
-app.put('/qa/questions/:question_id/report', (req, res) => {
-  let question_id = req.params.question_id
-  reportQuestion(question_id)
-    .then(results => {
-      res.sendStatus(204)
-    })
-    .catch(err => {
-      console.log(err)
-    })
-})
-
-app.put('/qa/answers/:answer_id/helpful', (req, res) => {
-  let answer_id = req.params.answer_id
-  updateAnswerHelpfulness(answer_id)
-    .then(results => {
-      res.sendStatus(204)
-    })
-    .catch(err => {
-      console.log(err)
-    })
-})
-
-app.put('/qa/answers/:answer_id/report', (req, res) => {
-  let answer_id = req.params.answer_id
-  reportAnswer(answer_id)
-    .then(results => {
-      res.sendStatus(204)
-    })
-    .catch(err => {
-      console.log(err)
-    })
-})
+app.put('/qa/answers/:answer_id/report', reportAnswer)
 
 app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}`)
