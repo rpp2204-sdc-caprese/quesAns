@@ -14,6 +14,7 @@ pool.connect()
 const handleGetResponse = (res, data) => res.status(200).send(data)
 const handlePostResponse = (res, data) => res.status(201).send(data)
 const handlePutResponse = (res, data) => res.status(204).send(data)
+const handleClientError = (res, err) => res.status(404).send(err)
 const handleError = (res, err) => res.status(500).send(err)
 
 
@@ -24,7 +25,7 @@ const getQuestions = async(req, res) => {
   let page = req.query.page || 1
 
   if(product_id === undefined || parseInt(product_id) < 0 || product_id.length === 0) {
-    return res.status(404).send('MUST HAVE VALID PRODUCT ID')
+    return handleClientError(res, 'MUST HAVE VALID PRODUCT ID')
   }
 
   let response = {
@@ -104,7 +105,7 @@ const getAnswers = async (req, res) => {
   let page = req.query.page || 1
 
   if(question_id === undefined || parseInt(question_id) < 0 || question_id.length === 0) {
-    return res.status(404).send('MUST HAVE VALID QUESTION ID')
+    return handleClientError(res, 'MUST HAVE VALID PRODUCT ID')
   }
 
   let response = {
