@@ -18,13 +18,13 @@ const app = express()
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 
-app.get('/qa/questions', getQuestions)
+app.route('/qa/questions')
+  .get(getQuestions)
+  .post(postQuestion)
 
-app.get('/qa/questions/:question_id/answers', getAnswers)
-
-app.post('/qa/questions', postQuestion)
-
-app.post('/qa/questions/:question_id/answers', postAnswer)
+app.route('/qa/questions/:question_id/answers')
+  .get(getAnswers)
+  .post(postAnswer)
 
 app.put('/qa/questions/:question_id/helpful', updateQuestionHelpfulness)
 
