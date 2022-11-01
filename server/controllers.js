@@ -11,6 +11,9 @@ const pool = new Pool({
 })
 pool.connect()
 
+const handleResponse = (res, data) => res.status(200).send(data)
+const handleError = (res, err) => res.status(500).send(err)
+
 
 const getQuestions = async(req, res) => {
 
@@ -83,11 +86,12 @@ const getQuestions = async(req, res) => {
         throw new Error('Server Error')
         return;
       }
-      res.status(200).send(results)
+      handleResponse(res, results)
+      //res.status(200).send(results)
     })
     .catch(err => {
       console.log(err)
-      res.status(500).send(err)
+      handleError(res, err)
     })
 }
 
@@ -128,15 +132,16 @@ const getAnswers = async (req, res) => {
       return response
     })
     .then(response => {
-      res.status(200).send(response)
+      handleResponse(res, response)
     })
     .catch(err => {
-      res.status(500).send(err)
+      handleError(res, err)
     })
 
 }
 
-const postQuestion = async (question) => {
+const postQuestion = async (req, res) => {
+  let question = req.body;
   let product_id = parseInt(question.product_id)
   let body = question.body
   let date_written = new Date().toISOString();
@@ -152,10 +157,10 @@ const postQuestion = async (question) => {
 
   return pool.query(query)
     .then(results => {
-      return results
+      res.status(201).send(results.rowCount)
     })
     .catch(err => {
-      console.log(err)
+      res.status(500).send(err)
     })
 }
 
