@@ -4,6 +4,7 @@
   "description": "",
   "main": "test.js",
   "scripts": {
+    "api_dev": "nodemon ./server/index.js",
     "test": "jest"
   },
   "repository": {
