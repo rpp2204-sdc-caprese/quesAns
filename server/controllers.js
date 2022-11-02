@@ -167,7 +167,7 @@ const postQuestion = async (req, res) => {
       handlePostResponse(res, results.rowCount)
     })
     .catch(err => {
-      res.status(500).send(err)
+      handleError(res, err)
     })
 }
 
