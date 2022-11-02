@@ -3,7 +3,6 @@ const PORT = process.env.PORT
 const express = require('express')
 
 const {
-  db,
   getQuestions,
   getAnswers,
   postQuestion,
@@ -12,123 +11,40 @@ const {
   updateAnswerHelpfulness,
   reportQuestion,
   reportAnswer
-} = require('./etl.js')
+} = require('./controllers.js')
 
 const app = express()
 
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 
-app.get('/qa/questions', (req, res) => {
-  let product_id = req.query.product_id
-  let count = req.query.count || 5
-  let page = req.query.page || 1
+app.route('/qa/questions')
+  .get(getQuestions)
+  .post(postQuestion)
 
-  getQuestions(product_id, count, page)
-    .then(results => {
-      console.log(results)
-      res.send(results)
-    })
-    .catch(err => {
-      console.log(err)
-      res.send(err)
-    })
-})
+app.route('/qa/questions/:question_id/answers')
+  .get(getAnswers)
+  .post(postAnswer)
 
-app.get('/qa/questions/:question_id/answers', (req, res) => {
-  let question_id = req.params.question_id
-  let count = req.query.count || 5
-  let page = req.query.page || 1
+app.put('/qa/questions/:question_id/helpful', updateQuestionHelpfulness)
 
-  getAnswers(question_id, count, page)
-    .then(results => {
-      res.send(results)
-    })
-    .catch(err => {
-      console.log(err)
-      res.send(err)
-    })
-})
+app.put('/qa/questions/:question_id/report', reportQuestion)
 
-app.post('/qa/questions', (req, res) => {
-  let question = req.body;
-  postQuestion(question)
-    .then(results => {
-      console.log(results.rowCount)
-      res.status(201).send(results.rowCount)
-    })
-    .catch(err => {
-      console.log(err)
-    })
-})
+app.put('/qa/answers/:answer_id/helpful', updateAnswerHelpfulness)
 
-app.post('/qa/questions/:question_id/answers', (req, res) => {
-  let question_id = parseInt(req.params.question_id)
-
-  let answer;
-  if(typeof req.body.data !== 'object') {
-    answer = JSON.parse(req.body.data)
-  } else {
-    answer = req.body.data
-  }
-
-  postAnswer(question_id, answer)
-    .then(results => {
-      res.sendStatus(201)
-    })
-    .catch(err => {
-      console.log(err)
-    })
-})
-
-app.put('/qa/questions/:question_id/helpful', (req, res) => {
-  let question_id = req.params.question_id
-  updateQuestionHelpfulness(question_id)
-    .then(results => {
-      res.sendStatus(204)
-    })
-    .catch(err => {
-      console.log(err)
-    })
-})
-
-app.put('/qa/questions/:question_id/report', (req, res) => {
-  let question_id = req.params.question_id
-  reportQuestion(question_id)
-    .then(results => {
-      res.sendStatus(204)
-    })
-    .catch(err => {
-      console.log(err)
-    })
-})
-
-app.put('/qa/answers/:answer_id/helpful', (req, res) => {
-  let answer_id = req.params.answer_id
-  updateAnswerHelpfulness(answer_id)
-    .then(results => {
-      res.sendStatus(204)
-    })
-    .catch(err => {
-      console.log(err)
-    })
-})
-
-app.put('/qa/answers/:answer_id/report', (req, res) => {
-  let answer_id = req.params.answer_id
-  reportAnswer(answer_id)
-    .then(results => {
-      res.sendStatus(204)
-    })
-    .catch(err => {
-      console.log(err)
-    })
-})
+app.put('/qa/answers/:answer_id/report', reportAnswer)
 
 app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}`)
 })
 
+module.exports = app
+
+/*FOR TESTING
+product_ids: 900010 - 1000011
+question_ids: 3167068 - 3518963
+answer_ids: 6191376 - 6879306
+*/
 
 
 /* GET QUESTIONS FOR PRODUCT  //SELECT * FROM QUESTIONS WHERE product_id =

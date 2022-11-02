@@ -27,52 +27,179 @@ const getQuestions = async(product_id, count, page) => {
     results: []
   }
   let offset = (page - 1) * count
-  // let query = {
-  //   text: 'select id, body, date_written, asker_name, reported, helpful from questions where product_id = $1 and reported = false limit $2 offset $3',
+//   let query = {
+//     text: `
+//     with cte as (
+//       select array_agg(url) as urls
+//       from
+//       answers_photos
+//       group by answers_photos.answer_id
+//     )
+
+//     select urls from cte where answers_photos.answer_id = 5
+
+// let queryText = `
+//      select q.id as question_id,
+//      q.body as question_body,
+//      q.date_written as question_date,
+//      asker_name,
+//      q.helpful as question_helpfulness,
+//      q.reported,
+//      coalesce(json_object_agg(a.id, json_build_object(
+//         'id', a.id,
+//         'body', a.body,
+//         'date', a.date_written,
+//         'answerer_name', a.answerer_name,
+//         'helpfulness', a.helpful
+//       )) filter (where a.id is not null), '{}') as answers
+//      from questions q
+//      LEFT JOIN
+//      answers a
+//      ON
+//      a.question_id = q.id
+//      AND
+//      a.reported = FALSE
+//     LEFT JOIN
+//   answers_photos
+// ON
+//   answer_id = a.id
+//      where product_id = $1 and q.reported = false group by q.id limit $2 offset $3`
   //   values: [product_id, count, offset]
   // }
+
+  /*
+  coalesce(json_object_agg(a.id, json_build_object(
+             'id', a.id,
+             'body', a.body,
+             'date', a.date_written,
+             'answerer_name', a.answerer_name,
+             'helpfulness', a.helpful,
+     )) filter (where a.id is not null), '{}') as answers
+
+
+
+
+
+
+  coalesce(json_agg(a) filter (where a.id is not null), '{}') as answers
+     from questions q
+     LEFT JOIN
+     answers a
+     ON
+     a.question_id = q.id
+     AND
+     a.reported = FALSE
+  */
+
+//coalesce(array_agg(url) filter (where url is not null), '{}') as photos
+/*
+  a.id,
+  a.body,
+  a.date_written AS date,
+  a.answerer_name,
+  a.helpful AS helpfulness,
+
+  coalesce(json_agg(a) filter (where a.id is not null), '{}') as answers,
+  coalesce(array_agg(url) filter (where url is not null), '{}') as photos
+*/
+//   let queryText = `SELECT
+//           q.id AS question_id,
+//           q.body AS question_body,
+//           q.date_written AS question_date,
+//           q.asker_name,
+//           q.helpful AS question_helpfulness,
+//           q.reported,
+//           coalesce(json_object_agg(a.id, json_build_object(
+//             'id', a.id,
+//             'body', a.body,
+//             'date', a.date_written,
+//             'answerer_name', a.answerer_name,
+//             'helpfulness', a.helpful,
+//             'photos', coalesce(array_agg(url) filter (where url is not null), '{}')
+//           ) )
+//           filter (where a.id is not null), '{}') as answers
+//     from questions q
+//     LEFT JOIN
+//     answers a
+//     ON
+//     a.question_id = q.id
+//     AND
+//     a.reported = FALSE
+//     LEFT JOIN
+//   answers_photos
+// ON
+//   answer_id = a.id
+//           WHERE
+//             q.product_id = $1
+//           AND
+//             q.reported = FALSE
+//           GROUP BY q.id, a.id
+//           ORDER BY
+//             q.id
+//           LIMIT
+//             $2
+//           OFFSET
+//             $3`
+
+let queryText = `select id, body, date_written, asker_name, helpful, reported from questions where product_id = $1 and reported = false limit $2 offset $3`
   let query = {
-    text: `SELECT
-              q.id AS question_id,
-              q.body AS question_body,
-              q.date_written AS question_date,
-              q.asker_name,
-              q.helpful AS question_helpfulness,
-              q.reported,
-              a.id,
-              a.body,
-              a.date_written AS date,
-              a.answerer_name,
-              a.helpful AS helpfulness,
-              url
-          FROM
-              questions q
-          LEFT JOIN
-              answers a
-          ON
-              a.question_id = q.id
-            AND
-              a.reported = FALSE
-          LEFT JOIN
-              answers_photos
-          ON
-              answer_id = a.id
-          WHERE
-              q.product_id = $1
-            AND
-              q.reported = FALSE
-          ORDER BY
-              q.id
-          LIMIT
-              $2
-          OFFSET
-              $3`,
+    text: queryText,
+  //   // `select answers.*, coalesce(array_agg(url) filter (where url is not null), '{}') as photos from answers left join answers_photos on answers_photos.answer_id = answers.id group by answers.id limit 10
+
+  //   //   `,
+
     values: [product_id, count, offset]
-  }
+   }
 
   return pool.query(query)
-    .then(results => {
-      console.log(results.rows)
+    // .then(results => {
+    //   console.log(results.rows)
+    //   return results.rows
+    // })
+  //  /*
+    .then(res => {
+      for(let i = 0; i < res.rows.length; i++) {
+        let question = {
+          question_id: res.rows[i].id,
+          question_body: res.rows[i].body,
+          question_date: res.rows[i].date_written,
+          asker_name: res.rows[i].asker_name,
+          question_helpfulness: res.rows[i].helpful,
+          reported: res.rows[i].reported,
+          answers: {}
+        }
+        response.results.push(question)
+      }
+      return response
+    })
+    .then(async (response) => {
+      for(let i = 0; i < response.results.length; i++) {
+        let question_id = response.results[i].question_id
+        let query = {
+          text: 'select id, body, date_written, answerer_name, reported, helpful from answers where question_id = $1 and reported = false',
+          values: [question_id]
+        }
+        let res = await pool.query(query)
+        for(let j = 0; j < res.rows.length; j++) {
+          response.results[i].answers[res.rows[j].id] = {
+            id: res.rows[j].id,
+            body: res.rows[j].body,
+            date: res.rows[j].date_written,
+            answerer_name: res.rows[j].answerer_name,
+            helpfulness: res.rows[j].helpful,
+            photos: []
+          }
+          let query = {
+            text: 'select url from answers_photos where answer_id = $1',
+            values: [res.rows[j].id],
+          }
+          let photos_urls = await pool.query(query)
+          photos_urls = photos_urls.rows.map(photo => photo.url)
+          response.results[i].answers[res.rows[j].id].photos = photos_urls
+        }
+      }
+
+      return response
     })
     // .then(res => {
     //   for(let i = 0; i < res.rows.length; i++) {
@@ -118,6 +245,7 @@ const getQuestions = async(product_id, count, page) => {
 
     //   return response
     // })
+   // */
     .catch(err => {
       console.log(err)
     })
