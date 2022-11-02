@@ -74,29 +74,27 @@ const getQuestions = async(req, res) => {
           }
           let answer_id = res.rows[j].id
           let query = {
-            // text: 'select url from answers_photos where answer_id = $1',
-            text: `select coalesce(array_agg(url), '{}') as photos from answers_photos where answer_id = $1`,
+            text: 'select url from answers_photos where answer_id = $1',
+            // text: `select coalesce(array_agg(url), '{}') as photos from answers_photos where answer_id = $1`,
             //text: `coalesce(array_agg(url) photos from answers_photos filter (where answer_id = $1), '{}')`,
             //text: `coalesce(select array_agg(url) photos filter (where url is not null), '{}') from answers_photos where answer_id = $1`,
             values: [answer_id]
           }
           let photos_urls = await pool.query(query)
-          console.log('PHOTOS: ',photos_urls.rows)
-          // photos_urls = photos_urls.rows.map(photo => photo.url)
-          photos_urls = photos_urls.rows[0].photos
+          //console.log('PHOTOS: ',photos_urls.rows)
+          photos_urls = photos_urls.rows.map(photo => photo.url)
+          // photos_urls = photos_urls.rows[0].photos
           response.results[i].answers[res.rows[j].id].photos = photos_urls
         }
       }
       return response
     })
     .then(results => {
-      console.log(results)
       if(results === undefined) {
         throw new Error('Server Error')
         return;
       }
       handleGetResponse(res, results)
-      //res.status(200).send(results)
     })
     .catch(err => {
       console.log(err)
