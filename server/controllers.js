@@ -1,15 +1,5 @@
 require('dotenv').config()
-const PASSWORD = process.env.PASSWORD
-const USER = process.env.DB_USER
-const DB = process.env.DB_NAME
-const { Pool } = require('pg')
-
-const pool = new Pool({
-        user: USER,
-        database: DB,
-        password: PASSWORD
-})
-pool.connect()
+const pool = require('./db.js')
 
 const handleGetResponse = (res, data) => res.status(200).send(data)
 const handlePostResponse = (res, data) => res.status(201).send(data)
@@ -33,6 +23,48 @@ const getQuestions = async(req, res) => {
     results: []
   }
   let offset = (page - 1) * count
+
+  // let queryText =  `SELECT
+  //           q.id AS question_id,
+  //           q.body AS question_body,
+  //           q.date_written AS question_date,
+  //           q.asker_name,
+  //           q.helpful AS question_helpfulness,
+  //           q.reported,
+  //           coalesce(json_object_agg(a.id, json_build_object(
+  //             'id', a.id,
+  //             'body', a.body,
+  //             'date', a.date_written,
+  //             'answerer_name', a.answerer_name,
+  //             'helpfulness', a.helpful,
+  //             'photos', coalesce(array_agg(url) filter (where url is not null), '{}')
+  //           ) )
+  //           filter (where a.id is not null), '{}') as answers
+  //     from questions q
+  //     LEFT JOIN
+  //     answers a
+  //     ON
+  //     a.question_id = q.id
+  //     AND
+  //     a.reported = FALSE
+  //     LEFT JOIN
+  //   answers_photos
+  // ON
+  //   answer_id = a.id
+  //           WHERE
+  //             q.product_id = $1
+  //           AND
+  //             q.reported = FALSE
+  //           GROUP BY q.id, a.id
+  //           ORDER BY
+  //             q.id
+  //           LIMIT
+  //             $2
+  //           OFFSET
+  //             $3`
+
+
+
   let queryText = `select id, body, date_written, asker_name, helpful, reported from questions where product_id = $1 and reported = false limit $2 offset $3`
   let query = {
     text: queryText,
