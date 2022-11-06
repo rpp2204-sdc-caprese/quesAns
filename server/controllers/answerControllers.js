@@ -27,21 +27,21 @@ const getAnswers = async (req, res) => {
   let offset = (page - 1) * count
 
   let queryText = `
-  SELECT
-  a.id as answer_id, body, date_written as date, answerer_name, helpful as helpfulness,
-  coalesce(json_agg(json_build_object(
-    'id', answers_photos.id,
-    'url', url
-  )) FILTER (where url is not null), '[]'::json) as photos
-  FROM answers a
-  LEFT JOIN
-  answers_photos on
-  answers_photos.answer_id = a.id
-  WHERE a.question_id = $1
-  and reported = false
-  group by a.id
-  order by a.id
-  limit $2 offset $3
+    SELECT
+      a.id as answer_id, body, date_written as date, answerer_name, helpful as helpfulness,
+      coalesce(json_agg(json_build_object(
+        'id', answers_photos.id,
+        'url', url
+      )) FILTER (where url is not null), '[]'::json) as photos
+    FROM answers a
+    LEFT JOIN
+      answers_photos on
+      answers_photos.answer_id = a.id
+    WHERE a.question_id = $1
+      and reported = false
+    group by a.id
+    order by a.id
+    limit $2 offset $3
   `
 
   let query = {
