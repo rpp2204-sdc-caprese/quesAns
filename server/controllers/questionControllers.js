@@ -6,7 +6,7 @@ const {
   handleError
 } = require('./resHelpers.js')
 
-const pool = require('./db.js')
+const pool = require('../db.js')
 
 const getQuestions = async(req, res) => {
 
@@ -148,4 +148,11 @@ const reportQuestion = (req, res) => {
     .catch(err => {
       handleError(res, err)
     })
+}
+
+module.exports = {
+  getQuestions,
+  postQuestion,
+  updateQuestionHelpfulness,
+  reportQuestion
 }
