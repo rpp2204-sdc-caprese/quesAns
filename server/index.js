@@ -11,7 +11,7 @@ const {
   updateAnswerHelpfulness,
   reportQuestion,
   reportAnswer
-} = require('./controllers.js')
+} = require('./controllers')
 
 const app = express()
 
