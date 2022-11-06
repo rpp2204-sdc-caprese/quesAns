@@ -58,7 +58,6 @@ const getAnswers = async (req, res) => {
       handleGetResponse(res, response)
     })
     .catch(err => {
-      console.log(err)
       handleError(res, err)
     })
 
