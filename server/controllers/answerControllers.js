@@ -26,28 +26,39 @@ const getAnswers = async (req, res) => {
   }
   let offset = (page - 1) * count
 
+  let queryText = `
+  SELECT
+  a.id as answer_id, body, date_written as date, answerer_name, helpful as helpfulness,
+  coalesce(json_agg(json_build_object(
+    'id', answers_photos.id,
+    'url', url
+  )) FILTER (where url is not null), '[]'::json) as photos
+  FROM answers a
+  LEFT JOIN
+  answers_photos on
+  answers_photos.answer_id = a.id
+  WHERE a.question_id = $1
+  and reported = false
+  group by a.id
+  order by a.id
+  limit $2 offset $3
+  `
+
   let query = {
-    text: `select id as answer_id, body, date_written as date, answerer_name, helpful as helpfulness from answers where question_id = $1 and reported = false limit $2 offset $3`,
+    text: queryText,
     values: [question_id, count, offset]
   }
 
   return pool.query(query)
     .then(async(results) => {
       response.results = results.rows
-      for(let i = 0; i < response.results.length; i++) {
-        let query = {
-          text: 'select id, url from answers_photos where answer_id = $1',
-          values: [response.results[i].answer_id]
-        }
-        let photos_urls = await pool.query(query)
-        response.results[i].photos = photos_urls.rows
-      }
       return response
     })
     .then(response => {
       handleGetResponse(res, response)
     })
     .catch(err => {
+      console.log(err)
       handleError(res, err)
     })
 
