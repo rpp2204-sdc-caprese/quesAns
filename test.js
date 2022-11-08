@@ -7,13 +7,13 @@ const request = require('supertest')
 // })
 let server;
 
-beforeEach(() => {
-  server = app.listen(4000)
-})
+// beforeEach(() => {
+//   server = app.listen(4000)
+// })
 
-afterEach(() => {
-  server.close()
-})
+// afterEach(() => {
+//   server.close()
+// })
 
 describe('GET questions', () => {
   it('Should return status code 200', async () => {
