@@ -1,15 +1,5 @@
 require('dotenv').config()
-const PASSWORD = process.env.PASSWORD
-const USER = process.env.DB_USER
-const DB = process.env.DB_NAME
-const { Pool } = require('pg')
-
-const pool = new Pool({
-        user: USER,
-        database: DB,
-        password: PASSWORD
-})
-pool.connect()
+const pool = require('./db.js')
 
 const handleGetResponse = (res, data) => res.status(200).send(data)
 const handlePostResponse = (res, data) => res.status(201).send(data)
@@ -33,60 +23,98 @@ const getQuestions = async(req, res) => {
     results: []
   }
   let offset = (page - 1) * count
-  let queryText = `select id, body, date_written, asker_name, helpful, reported from questions where product_id = $1 and reported = false limit $2 offset $3`
+//   let queryText = `SELECT
+//   q.id AS question_id,
+//   q.body AS question_body,
+//   q.date_written AS question_date,
+//   q.asker_name,
+//   q.helpful AS question_helpfulness,
+//   q.reported,
+//   coalesce(json_object_agg(a.id, json_build_object(
+//     'id', a.id,
+//     'body', a.body,
+//     'date', a.date_written,
+//     'answerer_name', a.answerer_name,
+//     'helpfulness', a.helpful,
+//     'photos', coalesce(array_agg(url) filter (where url is not null), '{}')
+//   ) )
+//   filter (where a.id is not null), '{}') as answers
+// from questions q
+// LEFT JOIN
+// answers a
+// ON
+// a.question_id = q.id
+// AND
+// a.reported = FALSE
+// LEFT JOIN
+// answers_photos
+// ON
+// answer_id = a.id
+//   WHERE
+//     q.product_id = $1
+//   AND
+//     q.reported = FALSE
+//   GROUP BY q.id, a.id
+//   ORDER BY
+//     q.id
+//   LIMIT
+//     $2
+//   OFFSET
+//     $3`
+  let queryText =  `
+            SELECT
+            q.id AS question_id,
+            q.body AS question_body,
+            q.date_written AS question_date,
+            q.asker_name,
+            q.helpful AS question_helpfulness,
+            q.reported,
+            coalesce(json_object_agg(a.id, json_build_object(
+              'id', a.id,
+              'body', a.body,
+              'date', a.date_written,
+              'answerer_name', a.answerer_name,
+              'helpfulness', a.helpful
+            ))
+            filter (where a.id is not null), '{}') as answers
+            FROM
+              questions q
+            LEFT JOIN
+              answers a
+            ON
+              a.question_id = q.id
+            AND
+              a.reported = FALSE
+            WHERE
+              q.product_id = $1
+            AND
+              q.reported = FALSE
+            GROUP BY q.id
+            ORDER BY
+              q.id
+            LIMIT
+              $2
+            OFFSET
+              $3`
+
   let query = {
     text: queryText,
     values: [product_id, count, offset]
    }
 
   return pool.query(query)
-    .then(res => {
-      for(let i = 0; i < res.rows.length; i++) {
-        let question = {
-          question_id: res.rows[i].id,
-          question_body: res.rows[i].body,
-          question_date: res.rows[i].date_written,
-          asker_name: res.rows[i].asker_name,
-          question_helpfulness: res.rows[i].helpful,
-          reported: res.rows[i].reported,
-          answers: {}
-        }
-        response.results.push(question)
-      }
-      return response
-    })
-    .then(async (response) => {
-      for(let i = 0; i < response.results.length; i++) {
-        let question_id = response.results[i].question_id
-        let query = {
-          text: 'select id, body, date_written, answerer_name, reported, helpful from answers where question_id = $1 and reported = false',
-          values: [question_id]
-        }
-        let res = await pool.query(query)
-        for(let j = 0; j < res.rows.length; j++) {
-          response.results[i].answers[res.rows[j].id] = {
-            id: res.rows[j].id,
-            body: res.rows[j].body,
-            date: res.rows[j].date_written,
-            answerer_name: res.rows[j].answerer_name,
-            helpfulness: res.rows[j].helpful,
-            photos: []
-          }
-          let answer_id = res.rows[j].id
+    .then(async(questions) => {
+      response.results = questions.rows
+       for(let i = 0; i < response.results.length; i++) {
+        for(let answer_id in response.results[i].answers) {
           let query = {
-            text: 'select url from answers_photos where answer_id = $1',
-            // text: `select coalesce(array_agg(url), '{}') as photos from answers_photos where answer_id = $1`,
-            //text: `coalesce(array_agg(url) photos from answers_photos filter (where answer_id = $1), '{}')`,
-            //text: `coalesce(select array_agg(url) photos filter (where url is not null), '{}') from answers_photos where answer_id = $1`,
+            text: `select coalesce(array_agg(url), '{}') as photos from answers_photos where answer_id = $1`,
             values: [answer_id]
           }
-          let photos_urls = await pool.query(query)
-          //console.log('PHOTOS: ',photos_urls.rows)
-          photos_urls = photos_urls.rows.map(photo => photo.url)
-          // photos_urls = photos_urls.rows[0].photos
-          response.results[i].answers[res.rows[j].id].photos = photos_urls
+          let photo_urls = await pool.query(query)
+          response.results[i].answers[answer_id].photos = photo_urls.rows[0].photos
         }
-      }
+       }
       return response
     })
     .then(results => {

@@ -4,14 +4,17 @@ const express = require('express')
 
 const {
   getQuestions,
-  getAnswers,
   postQuestion,
-  postAnswer,
   updateQuestionHelpfulness,
-  updateAnswerHelpfulness,
-  reportQuestion,
-  reportAnswer
-} = require('./controllers.js')
+  reportQuestion
+} = require('./controllers/questionControllers.js')
+
+const {
+    getAnswers,
+    postAnswer,
+    updateAnswerHelpfulness,
+    reportAnswer
+} = require('./controllers/answerControllers.js')
 
 const app = express()
 
