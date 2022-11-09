@@ -1,6 +1,11 @@
 require('dotenv').config()
 const PORT = process.env.PORT
 const express = require('express')
+const morgan = require('morgan')
+const path = require('path')
+const fs = require('fs')
+const rt = require('file-stream-rotator')
+const Writable = require('stream').Writable
 
 const {
   getQuestions,
@@ -18,8 +23,17 @@ const {
 
 const app = express()
 
+let fileWriter = rt.getStream({filename:'errors.log', frequency:'daily', verbose: true})
+const skipSuccess = (req, res) => res.StatusCode < 400
+
+
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
+app.use(morgan('combined', {
+    skip: skipSuccess,
+    stream: fileWriter
+}))
+
 
 app.route('/qa/questions')
   .get(getQuestions)
