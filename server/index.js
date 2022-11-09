@@ -24,7 +24,7 @@ const {
 const app = express()
 
 let fileWriter = rt.getStream({filename:'errors.log', frequency:'daily', verbose: true})
-const skipSuccess = (req, res) => res.StatusCode < 400
+const skipSuccess = (req, res) => res.statusCode < 400
 
 
 app.use(express.json())
