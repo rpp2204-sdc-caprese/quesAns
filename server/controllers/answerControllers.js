@@ -6,7 +6,8 @@ const {
   handleError
 } = require('./resHelpers.js')
 
-const pool = require('../db.js')
+const pool = require('../../database/db.js')
+const redisClient = require('../../database/redis.js')
 
 const getAnswers = async (req, res) => {
 
