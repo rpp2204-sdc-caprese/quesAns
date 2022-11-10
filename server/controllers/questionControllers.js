@@ -1,3 +1,4 @@
+require('dotenv').config()
 const {
   handleGetResponse,
   handlePostResponse,
@@ -7,6 +8,13 @@ const {
 } = require('./resHelpers.js')
 
 const pool = require('../db.js')
+
+const Redis = require('redis')
+const redisClient = Redis.createClient({
+  socket: {
+    host: process.env.REDIS_HOST
+  }
+})
 
 const getQuestions = async(req, res) => {
 
