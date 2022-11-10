@@ -88,7 +88,7 @@ const getQuestions = async(req, res) => {
       handleGetResponse(res, results)
     })
     .catch(err => {
-      console.log(err)
+      //console.log(err)
       handleError(res, err)
     })
 }
