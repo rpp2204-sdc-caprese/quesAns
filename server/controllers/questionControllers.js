@@ -117,6 +117,14 @@ const postQuestion = async (req, res) => {
   let reported = false;
   let helpful = 0;
 
+  const client = await pool.connect()
+
+  try {
+
+  } catch(err) {
+
+  }
+
   let query = {
     text: `insert into questions(product_id, body, date_written, asker_name, asker_email, reported, helpful) values($1, $2, $3, $4, $5, $6, $7)`,
     values: [product_id, body, date_written, asker_name, asker_email, reported, helpful]
