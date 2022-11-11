@@ -69,7 +69,7 @@ const getQuestions = async(req, res) => {
 
       let offset = (page - 1) * count
       let query = {
-        name: 'getQuestionsAnswers'
+        name: 'getQuestionsAnswers',
         text: queryText,
         values: [product_id, count, offset]
       }
@@ -95,7 +95,7 @@ const getQuestions = async(req, res) => {
             throw new Error('Server Error')
             return;
           }
-          await redisClient.set(`product_id=${product_id}&count=${count}&page=${page}`, JSON.stringify(results))
+//          await redisClient.set(`product_id=${product_id}&count=${count}&page=${page}`, JSON.stringify(results))
           handleGetResponse(res, results)
         })
         .catch(err => {
@@ -126,9 +126,9 @@ const postQuestion = async (req, res) => {
       text: `insert into questions(product_id, body, date_written, asker_name, asker_email, reported, helpful) values($1, $2, $3, $4, $5, $6, $7)`,
       values: [product_id, body, date_written, asker_name, asker_email, reported, helpful]
     }
-    await client.query(query)
+    let results = await client.query(query)
     await client.query('COMMIT')
-    handlePostResponse(res, results.rowCount)
+    handlePostResponse(res, JSON.stringify(results.rowCount))
   } catch(err) {
     await client.query('ROLLBACK')
     handleError(res, err)
