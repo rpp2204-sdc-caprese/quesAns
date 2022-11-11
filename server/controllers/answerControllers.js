@@ -7,7 +7,7 @@ const {
 } = require('./resHelpers.js')
 
 const pool = require('../../database/db.js')
-const redisClient = require('../../database/redis.js')
+//const redisClient = require('../../database/redis.js')
 
 const getAnswers = async (req, res) => {
 
@@ -122,35 +122,45 @@ const postAnswer = (req, res) => {
 
 
 const updateAnswerHelpfulness = (req, res) => {
+
   let answer_id = req.params.answer_id
-  let query = {
-    text: 'update answers set helpful = helpful + 1 where id = $1',
-    values: [answer_id]
+  const client = await pool.connect()
+  try {
+    await client.query('BEGIN')
+    let query = {
+      text: 'update answers set helpful = helpful + 1 where id = $1',
+      values: [answer_id]
+    }
+    await client.query('COMMIT')
+    handlePutResponse(res)
+  } catch(err) {
+    await client.query('ROLLBACK')
+    handleError(res, err)
+  } finally {
+    client.release()
   }
 
-  return pool.query(query)
-    .then(results => {
-      handlePutResponse(res, results)
-    })
-    .catch(err => {
-      handleError(res, err)
-    })
 }
 
 const reportAnswer = (req, res) => {
+
   let answer_id = req.params.answer_id
-  let query = {
-    text: 'update answers set reported = true where id = $1',
-    values: [answer_id]
+  const client = await pool.connect()
+  try {
+    await client.query('BEGIN')
+    let query = {
+      text: 'update answers set reported = true where id = $1',
+      values: [answer_id]
+    }
+    await client.query('COMMIT')
+    handlePutResponse(res)
+  } catch(err) {
+    await client.query('ROLLBACK')
+    handleError(res, err)
+  } finally {
+    client.release()
   }
 
-  return pool.query(query)
-    .then(results => {
-      handlePutResponse(res, results)
-    })
-    .catch(err => {
-      handleError(res, err)
-    })
 }
 
 module.exports = {
