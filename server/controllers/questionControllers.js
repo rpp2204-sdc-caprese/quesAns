@@ -15,22 +15,22 @@ const getQuestions = async(req, res) => {
   let count = req.query.count || 5
   let page = req.query.page || 1
 
+
   if(product_id === undefined || parseInt(product_id) < 0 || product_id.length === 0) {
     return handleClientError(res, 'MUST HAVE VALID PRODUCT ID')
   }
 
-  let response = {
-    product_id: product_id,
-    results: []
-  }
-  let offset = (page - 1) * count
-
   try {
     const cache = await redisClient.get(`product_id=${product_id}&count=${count}&page=${page}`)
     if(cache) {
-      response = JSON.parse(cache)
-      handleGetResponse(res, response)
+      handleGetResponse(res, JSON.parse(cache))
     } else {
+
+      let response = {
+        product_id: product_id,
+        results: []
+      }
+
       let queryText =  `
             SELECT
             q.id AS question_id,
@@ -67,12 +67,14 @@ const getQuestions = async(req, res) => {
             OFFSET
               $3`
 
+      let offset = (page - 1) * count
       let query = {
         text: queryText,
         values: [product_id, count, offset]
       }
 
-      return pool.query(query)
+      pool
+        .query(query)
         .then(async(questions) => {
           response.results = questions.rows
           for(let i = 0; i < response.results.length; i++) {
