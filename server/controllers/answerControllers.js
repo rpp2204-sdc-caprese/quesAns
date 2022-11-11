@@ -56,7 +56,7 @@ const getAnswers = async (req, res) => {
             count: count,
           }
           response.results = results.rows
-          await redisClient.set(`question_id=${question_id}&count=${count}&page=${page}`, JSON.stringify(response))
+//          await redisClient.set(`question_id=${question_id}&count=${count}&page=${page}`, JSON.stringify(response))
           handleGetResponse(res, response)
         })
         .catch(err => {
@@ -121,7 +121,7 @@ const postAnswer = (req, res) => {
 }
 
 
-const updateAnswerHelpfulness = (req, res) => {
+const updateAnswerHelpfulness = async(req, res) => {
 
   let answer_id = req.params.answer_id
   const client = await pool.connect()
@@ -142,7 +142,7 @@ const updateAnswerHelpfulness = (req, res) => {
 
 }
 
-const reportAnswer = (req, res) => {
+const reportAnswer = async(req, res) => {
 
   let answer_id = req.params.answer_id
   const client = await pool.connect()
