@@ -7,7 +7,7 @@ const {
 } = require('./resHelpers.js')
 
 const pool = require('../../database/db.js')
-const redisClient = require('../../database/redis.js')
+//const redisClient = require('../../database/redis.js')
 
 const getQuestions = async(req, res) => {
 
@@ -20,11 +20,11 @@ const getQuestions = async(req, res) => {
     return handleClientError(res, 'MUST HAVE VALID PRODUCT ID')
   }
 
-  try {
-    const cache = await redisClient.get(`product_id=${product_id}&count=${count}&page=${page}`)
-    if(cache) {
-      handleGetResponse(res, JSON.parse(cache))
-    } else {
+  // try {
+  //   const cache = await redisClient.get(`product_id=${product_id}&count=${count}&page=${page}`)
+  //   if(cache) {
+  //     handleGetResponse(res, JSON.parse(cache))
+  //   } else {
 
       let response = {
         product_id: product_id,
@@ -69,6 +69,7 @@ const getQuestions = async(req, res) => {
 
       let offset = (page - 1) * count
       let query = {
+        name: 'getQuestionsAnswers'
         text: queryText,
         values: [product_id, count, offset]
       }
@@ -100,10 +101,10 @@ const getQuestions = async(req, res) => {
         .catch(err => {
           handleError(res, err)
         })
-    }
-  } catch(err) {
-    handleError(res, err)
-  }
+  //   }
+  // } catch(err) {
+  //   handleError(res, err)
+  // }
 }
 
 
@@ -120,23 +121,21 @@ const postQuestion = async (req, res) => {
   const client = await pool.connect()
 
   try {
-
+    await client.query('BEGIN')
+    let query = {
+      text: `insert into questions(product_id, body, date_written, asker_name, asker_email, reported, helpful) values($1, $2, $3, $4, $5, $6, $7)`,
+      values: [product_id, body, date_written, asker_name, asker_email, reported, helpful]
+    }
+    await client.query(query)
+    await client.query('COMMIT')
+    handlePostResponse(res, results.rowCount)
   } catch(err) {
-
+    await client.query('ROLLBACK')
+    handleError(res, err)
+  } finally {
+    client.release()
   }
 
-  let query = {
-    text: `insert into questions(product_id, body, date_written, asker_name, asker_email, reported, helpful) values($1, $2, $3, $4, $5, $6, $7)`,
-    values: [product_id, body, date_written, asker_name, asker_email, reported, helpful]
-  }
-
-  return pool.query(query)
-    .then(results => {
-      handlePostResponse(res, results.rowCount)
-    })
-    .catch(err => {
-      handleError(res, err)
-    })
 }
 
 const updateQuestionHelpfulness = (req, res) => {
