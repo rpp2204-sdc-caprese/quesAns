@@ -138,20 +138,26 @@ const postQuestion = async (req, res) => {
 
 }
 
-const updateQuestionHelpfulness = (req, res) => {
+const updateQuestionHelpfulness = async(req, res) => {
   let question_id = req.params.question_id
-  let query = {
-    text: 'update questions set helpful = helpful + 1 where id = $1',
-    values: [question_id]
+  const client = await pool.connect()
+
+  try {
+    await client.query('BEGIN')
+    let query = {
+      text: 'update questions set helpful = helpful + 1 where id = $1',
+      values: [question_id]
+    }
+    let results = await client.query(query)
+    await client.query('COMMIT')
+    handlePutResponse(res, JSON.stringify(results))
+  } catch(err) {
+    await client.query('ROLLBACK')
+    handleError(res, err)
+  } finally {
+    client.release()
   }
 
-  return pool.query(query)
-    .then(results => {
-      handlePutResponse(res, results)
-    })
-    .catch(err => {
-      handleError(res, err)
-    })
 }
 
 const reportQuestion = (req, res) => {
