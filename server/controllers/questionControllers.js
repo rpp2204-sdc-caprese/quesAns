@@ -6,7 +6,8 @@ const {
   handleError
 } = require('./resHelpers.js')
 
-const pool = require('../db.js')
+const pool = require('../database/db.js')
+const redisClient = require('../database/redis.js')
 
 const getQuestions = async(req, res) => {
 
@@ -24,7 +25,13 @@ const getQuestions = async(req, res) => {
   }
   let offset = (page - 1) * count
 
-  let queryText =  `
+  try {
+    const cache = await redisClient.get(`product_id=${product_id}&count=${count}&page=${page}`)
+    if(cache) {
+      response = JSON.parse(cache)
+      handleGetResponse(res, response)
+    } else {
+      let queryText =  `
             SELECT
             q.id AS question_id,
             q.body AS question_body,
@@ -60,37 +67,41 @@ const getQuestions = async(req, res) => {
             OFFSET
               $3`
 
-  let query = {
-    text: queryText,
-    values: [product_id, count, offset]
-   }
-
-  return pool.query(query)
-    .then(async(questions) => {
-      response.results = questions.rows
-       for(let i = 0; i < response.results.length; i++) {
-        for(let answer_id in response.results[i].answers) {
-          let query = {
-            text: `select coalesce(array_agg(url), '{}') as photos from answers_photos where answer_id = $1`,
-            values: [answer_id]
-          }
-          let photo_urls = await pool.query(query)
-          response.results[i].answers[answer_id].photos = photo_urls.rows[0].photos
-        }
-       }
-      return response
-    })
-    .then(results => {
-      if(results === undefined) {
-        throw new Error('Server Error')
-        return;
+      let query = {
+        text: queryText,
+        values: [product_id, count, offset]
       }
-      handleGetResponse(res, results)
-    })
-    .catch(err => {
-      console.log(err)
-      handleError(res, err)
-    })
+
+      return pool.query(query)
+        .then(async(questions) => {
+          response.results = questions.rows
+          for(let i = 0; i < response.results.length; i++) {
+            for(let answer_id in response.results[i].answers) {
+              let query = {
+                text: `select coalesce(array_agg(url), '{}') as photos from answers_photos where answer_id = $1`,
+                values: [answer_id]
+              }
+              let photo_urls = await pool.query(query)
+              response.results[i].answers[answer_id].photos = photo_urls.rows[0].photos
+            }
+          }
+          return response
+        })
+        .then(async(results) => {
+          if(results === undefined) {
+            throw new Error('Server Error')
+            return;
+          }
+          await redisClient.set(`product_id=${product_id}&count=${count}&page=${page}`, JSON.stringify(results))
+          handleGetResponse(res, results)
+        })
+        .catch(err => {
+          handleError(res, err)
+        })
+    }
+  } catch(err) {
+    handleError(res, err)
+  }
 }
 
 
