@@ -139,16 +139,15 @@ const postQuestion = async (req, res) => {
 }
 
 const updateQuestionHelpfulness = async(req, res) => {
+
   let question_id = req.params.question_id
   const client = await pool.connect()
-
   try {
     await client.query('BEGIN')
     let query = {
       text: 'update questions set helpful = helpful + 1 where id = $1',
       values: [question_id]
     }
-    let results = await client.query(query)
     await client.query('COMMIT')
     handlePutResponse(res)
   } catch(err) {
@@ -161,8 +160,8 @@ const updateQuestionHelpfulness = async(req, res) => {
 }
 
 const reportQuestion = async(req, res) => {
-  let question_id = req.params.question_id
 
+  let question_id = req.params.question_id
   const client = await pool.connect()
   try {
     await client.query('BEGIN')
@@ -170,7 +169,6 @@ const reportQuestion = async(req, res) => {
       text: 'update questions set reported = true where id = $1',
       values: [question_id]
     }
-    let results = await client.query(query)
     await client.query('COMMIT')
     handlePutResponse(res)
   } catch(err) {
@@ -179,6 +177,7 @@ const reportQuestion = async(req, res) => {
   } finally {
     client.release()
   }
+
 }
 
 module.exports = {
