@@ -150,7 +150,7 @@ const updateQuestionHelpfulness = async(req, res) => {
     }
     let results = await client.query(query)
     await client.query('COMMIT')
-    handlePutResponse(res, JSON.stringify(results))
+    handlePutResponse(res)
   } catch(err) {
     await client.query('ROLLBACK')
     handleError(res, err)
@@ -160,20 +160,25 @@ const updateQuestionHelpfulness = async(req, res) => {
 
 }
 
-const reportQuestion = (req, res) => {
+const reportQuestion = async(req, res) => {
   let question_id = req.params.question_id
-  let query = {
-    text: 'update questions set reported = true where id = $1',
-    values: [question_id]
-  }
 
-  return pool.query(query)
-    .then(results => {
-      handlePutResponse(res, results)
-    })
-    .catch(err => {
-      handleError(res, err)
-    })
+  const client = await pool.connect()
+  try {
+    await client.query('BEGIN')
+    let query = {
+      text: 'update questions set reported = true where id = $1',
+      values: [question_id]
+    }
+    let results = await client.query(query)
+    await client.query('COMMIT')
+    handlePutResponse(res)
+  } catch(err) {
+    await client.query('ROLLBACK')
+    handleError(res, err)
+  } finally {
+    client.release()
+  }
 }
 
 module.exports = {
