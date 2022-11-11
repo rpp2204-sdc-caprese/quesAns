@@ -19,49 +19,53 @@ const getAnswers = async (req, res) => {
     return handleClientError(res, 'MUST HAVE VALID PRODUCT ID')
   }
 
-  let response = {
-    question: question_id,
-    page: page,
-    count: count,
-    results: []
+  try {
+    const cache = await redisClient.get(`question_id=${question_id}&count=${count}&page=${page}`)
+    if(cache) {
+      handleGetResponse(res, JSON.parse(cache))
+    } else {
+      let queryText = `
+      SELECT
+        a.id as answer_id, body, date_written as date, answerer_name, helpful as helpfulness,
+        coalesce(json_agg(json_build_object(
+          'id', answers_photos.id,
+          'url', url
+        )) FILTER (where url is not null), '[]'::json) as photos
+      FROM answers a
+      LEFT JOIN
+        answers_photos on
+        answers_photos.answer_id = a.id
+      WHERE a.question_id = $1
+        and reported = false
+      group by a.id
+      order by a.id
+      limit $2 offset $3
+      `
+      let offset = (page - 1) * count
+      let query = {
+        text: queryText,
+        values: [question_id, count, offset]
+      }
+
+      pool
+        .query(query)
+        .then(async(results) => {
+          let response = {
+            question: question_id,
+            page: page,
+            count: count,
+          }
+          response.results = results.rows
+          await redisClient.set(`question_id=${question_id}&count=${count}&page=${page}`, JSON.stringify(response))
+          handleGetResponse(res, response)
+        })
+        .catch(err => {
+          handleError(res, err)
+        })
+    }
+  } catch(err) {
+    handleError(res, err)
   }
-  let offset = (page - 1) * count
-
-  let queryText = `
-    SELECT
-      a.id as answer_id, body, date_written as date, answerer_name, helpful as helpfulness,
-      coalesce(json_agg(json_build_object(
-        'id', answers_photos.id,
-        'url', url
-      )) FILTER (where url is not null), '[]'::json) as photos
-    FROM answers a
-    LEFT JOIN
-      answers_photos on
-      answers_photos.answer_id = a.id
-    WHERE a.question_id = $1
-      and reported = false
-    group by a.id
-    order by a.id
-    limit $2 offset $3
-  `
-
-  let query = {
-    text: queryText,
-    values: [question_id, count, offset]
-  }
-
-  return pool.query(query)
-    .then(async(results) => {
-      response.results = results.rows
-      return response
-    })
-    .then(response => {
-      handleGetResponse(res, response)
-    })
-    .catch(err => {
-      handleError(res, err)
-    })
-
 }
 
 
