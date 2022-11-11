@@ -25,7 +25,13 @@ const getQuestions = async(req, res) => {
   }
   let offset = (page - 1) * count
 
-  let queryText =  `
+  try {
+    const cache = await redisClient.get(`product_id=${product_id}&count=${count}&page=${page}`)
+    if(cache) {
+      response = JSON.parse(cache)
+      handleGetResponse(res, response)
+    } else {
+      let queryText =  `
             SELECT
             q.id AS question_id,
             q.body AS question_body,
@@ -81,16 +87,26 @@ const getQuestions = async(req, res) => {
        }
       return response
     })
-    .then(results => {
+    .then(async(results) => {
       if(results === undefined) {
         throw new Error('Server Error')
         return;
       }
+      await redisClient.set(`product_id=${product_id}&count=${count}&page=${page}`, JSON.stringify(results))
       handleGetResponse(res, results)
     })
     .catch(err => {
       handleError(res, err)
     })
+    }
+  } catch(err) {
+    console.log(err)
+    handleError(res, err)
+  }
+
+
+
+
 }
 
 
