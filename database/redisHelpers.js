@@ -1,4 +1,5 @@
 const redisClient = require('./redis.js')
+const EXPIRATION_SEC = 60
 
 
 const getCache  = async(key) => {
@@ -8,7 +9,7 @@ const getCache  = async(key) => {
 
 
 const setCache = async(key, value) => {
-  await redisClient.set(key, JSON.stringify(value))
+  await redisClient.set(key, EXPIRATION_SEC, JSON.stringify(value))
 }
 
 
