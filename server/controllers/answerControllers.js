@@ -14,8 +14,10 @@ const {
   UPDATE_ANSWERS_REPORTED
 } = require('./queries/queriesAnswers.js')
 
+const { getCache, setCache } = require('../../database/redisHelpers.js')
+
 const pool = require('../../database/db.js')
-//const redisClient = require('../../database/redis.js')
+const redisClient = require('../../database/redis.js')
 
 const getAnswers = async (req, res) => {
 
@@ -29,8 +31,8 @@ const getAnswers = async (req, res) => {
 
   try {
     let redisAnswerKey = `question_id=${question_id}&count=${count}&page=${page}`;
-    const cache = await redisClient.get(redisAnswerKey)
-    if(cache) {
+    const cache = await getCache(redisAnswerKey)
+    if(!!cache) {
       handleGetResponse(res, JSON.parse(cache))
     } else {
       let queryText = SELECT_ANSWERS
@@ -49,7 +51,7 @@ const getAnswers = async (req, res) => {
             count: count,
           }
           response.results = results.rows
-//          await redisClient.set(redisAnswerKey, JSON.stringify(response))
+          await setCache(redisAnswerKey, JSON.stringify(response))
           handleGetResponse(res, response)
         })
         .catch(err => {
