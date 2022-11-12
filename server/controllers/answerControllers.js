@@ -6,6 +6,14 @@ const {
   handleError
 } = require('./resHelpers.js')
 
+const {
+  SELECT_ANSWERS,
+  INSERT_ANSWERS,
+  INSERT_PHOTOS,
+  UPDATE_ANSWERS_HELPFULNESS,
+  UPDATE_ANSWERS_REPORTED
+} = require('./queries/queriesAnswers.js')
+
 const pool = require('../../database/db.js')
 //const redisClient = require('../../database/redis.js')
 
@@ -24,23 +32,7 @@ const getAnswers = async (req, res) => {
     if(cache) {
       handleGetResponse(res, JSON.parse(cache))
     } else {
-      let queryText = `
-      SELECT
-        a.id as answer_id, body, date_written as date, answerer_name, helpful as helpfulness,
-        coalesce(json_agg(json_build_object(
-          'id', answers_photos.id,
-          'url', url
-        )) FILTER (where url is not null), '[]'::json) as photos
-      FROM answers a
-      LEFT JOIN
-        answers_photos on
-        answers_photos.answer_id = a.id
-      WHERE a.question_id = $1
-        and reported = false
-      group by a.id
-      order by a.id
-      limit $2 offset $3
-      `
+      let queryText = SELECT_ANSWERS
       let offset = (page - 1) * count
       let query = {
         text: queryText,
@@ -90,7 +82,7 @@ const postAnswer = (req, res) => {
   console.log(body, name, email, photos)
 
   let answerQuery = {
-    text: 'insert into answers(question_id, body, date_written, answerer_name, answerer_email, reported, helpful) values($1, $2, $3, $4, $5, $6, $7) returning id',
+    text: INSERT_ANSWERS,
     values: [question_id, body, date_written, name, email, reported, helpful]
   }
 
@@ -103,7 +95,7 @@ const postAnswer = (req, res) => {
       let photoQueries = []
       for(let i = 0; i < photos.length; i++) {
         let photoQuery = {
-          text: 'insert into answers_photos(answer_id, url) values($1, $2)',
+          text: INSERT_PHOTOS,
           values: [answer_id, photos[i]]
         }
         photoQueries.push(pool.query(photoQuery))
@@ -121,47 +113,31 @@ const postAnswer = (req, res) => {
 }
 
 
-const updateAnswerHelpfulness = async(req, res) => {
-
+const updateAnswerHelpfulness = (req, res) => {
   let answer_id = req.params.answer_id
-  const client = await pool.connect()
-  try {
-    await client.query('BEGIN')
-    let query = {
-      text: 'update answers set helpful = helpful + 1 where id = $1',
-      values: [answer_id]
-    }
-    await client.query('COMMIT')
-    handlePutResponse(res)
-  } catch(err) {
-    await client.query('ROLLBACK')
-    handleError(res, err)
-  } finally {
-    client.release()
+  let query = {
+    text: UPDATE_ANSWERS_HELPFULNESS,
+    values: [answer_id]
   }
-
+  pool
+    .query(query)
+    .then(() => handlePutResponse(res))
+    .catch(err => handleError(res, err))
 }
 
-const reportAnswer = async(req, res) => {
 
+const reportAnswer = (req, res) => {
   let answer_id = req.params.answer_id
-  const client = await pool.connect()
-  try {
-    await client.query('BEGIN')
-    let query = {
-      text: 'update answers set reported = true where id = $1',
-      values: [answer_id]
-    }
-    await client.query('COMMIT')
-    handlePutResponse(res)
-  } catch(err) {
-    await client.query('ROLLBACK')
-    handleError(res, err)
-  } finally {
-    client.release()
+  let query = {
+    text: UPDATE_ANSWERS_REPORTED,
+    values: [answer_id]
   }
-
+  pool
+    .query(query)
+    .then(() => handlePutResponse(res))
+    .catch(err => handleError(res, err))
 }
+
 
 module.exports = {
   getAnswers,
