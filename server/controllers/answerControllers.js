@@ -87,7 +87,8 @@ const postAnswer = (req, res) => {
     values: [question_id, body, date_written, name, email, reported, helpful]
   }
 
-  return pool.query(answerQuery)
+  pool
+    .query(answerQuery)
     .then(results => {
       let answer_id = results.rows[0].id
       return answer_id
