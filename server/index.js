@@ -6,7 +6,7 @@ const path = require('path')
 const fs = require('fs')
 const rt = require('file-stream-rotator')
 const Writable = require('stream').Writable
-const loaderio_verification_file = ''
+const loaderio_verification_token = ''
 
 const {
   getQuestions,
@@ -44,8 +44,8 @@ app.put('/qa/questions/:question_id/report', reportQuestion)
 app.put('/qa/answers/:answer_id/helpful', updateAnswerHelpfulness)
 app.put('/qa/answers/:answer_id/report', reportAnswer)
 
-app.get(`/${loaderio_verification_file}.txt`, (req, res) => {
-    res.send(loaderio_verification_file)
+app.get(`/${loaderio_verification_token}.txt`, (req, res) => {
+    res.send(loaderio_verification_token)
 })
 
 app.listen(PORT, () => {
