@@ -17,10 +17,9 @@ const {
 const { getCache, setCache } = require('../../database/redisHelpers.js')
 
 const pool = require('../../database/db.js')
-//const redisClient = require('../../database/redis.js')
+
 
 const getQuestions = async(req, res) => {
-
   let product_id = req.query.product_id
   let count = req.query.count || 5
   let page = req.query.page || 1
