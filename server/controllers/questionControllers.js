@@ -28,11 +28,12 @@ const getQuestions = async(req, res) => {
     return handleClientError(res, 'MUST HAVE VALID PRODUCT ID')
   }
 
-  // try {
-  //   const cache = await redisClient.get(`product_id=${product_id}&count=${count}&page=${page}`)
-  //   if(cache) {
-  //     handleGetResponse(res, JSON.parse(cache))
-  //   } else {
+  try {
+    let redisQuestionKey = `product_id=${product_id}&count=${count}&page=${page}`
+    const cache = await redisClient.get(redisQuestionKey)
+    if(cache) {
+      handleGetResponse(res, JSON.parse(cache))
+    } else {
 
       let response = {
         product_id: product_id,
@@ -42,7 +43,7 @@ const getQuestions = async(req, res) => {
       let queryText =  SELECT_QUESTIONS_ANSWERS
       let offset = (page - 1) * count
       let query = {
-        name: 'getQuestionsAnswers',
+        //name: 'getQuestionsAnswers',
         text: queryText,
         values: [product_id, count, offset]
       }
@@ -68,16 +69,16 @@ const getQuestions = async(req, res) => {
             throw new Error('Server Error')
             return;
           }
-//          await redisClient.set(`product_id=${product_id}&count=${count}&page=${page}`, JSON.stringify(results))
+         await redisClient.set(redisQuestionKey, JSON.stringify(results))
           handleGetResponse(res, results)
         })
         .catch(err => {
           handleError(res, err)
         })
-  //   }
-  // } catch(err) {
-  //   handleError(res, err)
-  // }
+    }
+  } catch(err) {
+    handleError(res, err)
+  }
 }
 
 
