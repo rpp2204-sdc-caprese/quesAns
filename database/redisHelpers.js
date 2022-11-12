@@ -1,5 +1,5 @@
 const redisClient = require('./redis.js')
-const EXPIRATION_SEC = 60
+const EXPIRATION_SEC = 3600
 
 
 const getCache  = async(key) => {
