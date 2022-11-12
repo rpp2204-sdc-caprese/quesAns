@@ -1,12 +1,12 @@
 require('dotenv').config()
-const PASSWORD = process.env.PASSWORD
+const PASSWORD = process.env.POSTGRES_PASSWORD
 const USER = process.env.DB_USER
 const DB = process.env.DB_NAME
-const HOST = process.env.DB_HOST
+//const HOST = process.env.DB_HOST
 const { Pool } = require('pg')
 
 const pool = new Pool({
-        host:HOST,
+        //host: HOST,
         user: USER,
         database: DB,
         password: PASSWORD
