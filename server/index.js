@@ -6,6 +6,7 @@ const path = require('path')
 const fs = require('fs')
 const rt = require('file-stream-rotator')
 const Writable = require('stream').Writable
+const loaderio_verification_file = ''
 
 const {
   getQuestions,
@@ -44,12 +45,13 @@ app.route('/qa/questions/:question_id/answers')
   .post(postAnswer)
 
 app.put('/qa/questions/:question_id/helpful', updateQuestionHelpfulness)
-
 app.put('/qa/questions/:question_id/report', reportQuestion)
-
 app.put('/qa/answers/:answer_id/helpful', updateAnswerHelpfulness)
-
 app.put('/qa/answers/:answer_id/report', reportAnswer)
+
+app.get(`/${loaderio_verification_file}.txt`, (req, res) => {
+    res.send(loaderio_verification_file)
+})
 
 app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}`)
