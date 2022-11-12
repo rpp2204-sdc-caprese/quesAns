@@ -23,15 +23,16 @@ const getQuestions = async(req, res) => {
   let count = req.query.count || 5
   let page = req.query.page || 1
 
+  const product_id_is_invalid = product_id === undefined || parseInt(product_id) < 0 || product_id.length === 0
 
-  if(product_id === undefined || parseInt(product_id) < 0 || product_id.length === 0) {
+  if(product_id_is_invalid) {
     return handleClientError(res, 'MUST HAVE VALID PRODUCT ID')
   }
 
   try {
     let redisQuestionKey = `product_id=${product_id}&count=${count}&page=${page}`
     const cache = await redisClient.get(redisQuestionKey)
-    if(cache) {
+    if(!!cache) {
       handleGetResponse(res, JSON.parse(cache))
     } else {
 
@@ -69,7 +70,7 @@ const getQuestions = async(req, res) => {
             throw new Error('Server Error')
             return;
           }
-         await redisClient.set(redisQuestionKey, JSON.stringify(results))
+          await redisClient.set(redisQuestionKey, JSON.stringify(results))
           handleGetResponse(res, results)
         })
         .catch(err => {
