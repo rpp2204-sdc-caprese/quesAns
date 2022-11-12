@@ -14,6 +14,8 @@ const {
   UPDATE_QUESTION_REPORTED
 } = require('./queries/queriesQuestions.js')
 
+const { getCache, setCache } = require('../../database/redisHelpers.js')
+
 const pool = require('../../database/db.js')
 //const redisClient = require('../../database/redis.js')
 
@@ -31,11 +33,10 @@ const getQuestions = async(req, res) => {
 
   try {
     let redisQuestionKey = `product_id=${product_id}&count=${count}&page=${page}`
-    const cache = await redisClient.get(redisQuestionKey)
+    const cache = await getCache(redisQuestionKey)
     if(!!cache) {
       handleGetResponse(res, JSON.parse(cache))
     } else {
-
       let response = {
         product_id: product_id,
         results: []
@@ -70,7 +71,7 @@ const getQuestions = async(req, res) => {
             throw new Error('Server Error')
             return;
           }
-          await redisClient.set(redisQuestionKey, JSON.stringify(results))
+          await setCache(redisQuestionKey, results)
           handleGetResponse(res, results)
         })
         .catch(err => {
