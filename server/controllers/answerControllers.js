@@ -28,7 +28,8 @@ const getAnswers = async (req, res) => {
   }
 
   try {
-    const cache = await redisClient.get(`question_id=${question_id}&count=${count}&page=${page}`)
+    let redisAnswerKey = `question_id=${question_id}&count=${count}&page=${page}`;
+    const cache = await redisClient.get(redisAnswerKey)
     if(cache) {
       handleGetResponse(res, JSON.parse(cache))
     } else {
@@ -48,7 +49,7 @@ const getAnswers = async (req, res) => {
             count: count,
           }
           response.results = results.rows
-//          await redisClient.set(`question_id=${question_id}&count=${count}&page=${page}`, JSON.stringify(response))
+//          await redisClient.set(redisAnswerKey, JSON.stringify(response))
           handleGetResponse(res, response)
         })
         .catch(err => {
