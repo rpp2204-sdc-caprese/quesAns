@@ -6,10 +6,10 @@ const DB = process.env.DB_NAME
 const { Pool } = require('pg')
 
 const pool = new Pool({
-        //host: HOST,
-        user: USER,
-        database: DB,
-        password: PASSWORD
+    //host: HOST,
+    user: USER,
+    database: DB,
+    password: PASSWORD
 })
 
 try {
