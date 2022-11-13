@@ -12,7 +12,7 @@ const {
   INSERT_QUESTION,
   UPDATE_QUESTION_HELPFULNESS,
   UPDATE_QUESTION_REPORTED
-} = require('./queries/queriesQuestions.js')
+} = require('../../database/queries/queriesQuestions.js')
 
 const { getCache, setCache } = require('../../database/redisHelpers.js')
 
