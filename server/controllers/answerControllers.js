@@ -68,6 +68,8 @@ const postAnswer = async(req, res) => {
   let reported = false
   let helpful = 0
 
+  if(idIsInvalid(question_id)) return handleClientError(res, 'MUST HAVE VALID QUESTION ID')
+
   const client = await pool.connect()
   try {
     await client.query('BEGIN')
@@ -100,6 +102,7 @@ const postAnswer = async(req, res) => {
 
 const updateAnswerHelpfulness = (req, res) => {
   let answer_id = req.params.answer_id
+  if(idIsInvalid(answer_id)) return handleClientError(res, 'MUST HAVE VALID ANSWER ID')
   let query = {
     text: UPDATE_ANSWERS_HELPFULNESS,
     values: [answer_id]
@@ -113,6 +116,7 @@ const updateAnswerHelpfulness = (req, res) => {
 
 const reportAnswer = (req, res) => {
   let answer_id = req.params.answer_id
+  if(idIsInvalid(answer_id)) return handleClientError(res, 'MUST HAVE VALID ANSWER ID')
   let query = {
     text: UPDATE_ANSWERS_REPORTED,
     values: [answer_id]

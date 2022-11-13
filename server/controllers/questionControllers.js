@@ -82,6 +82,8 @@ const postQuestion = async (req, res) => {
   let reported = false;
   let helpful = 0;
 
+  if(idIsInvalid(product_id)) return handleClientError(res, 'MUST HAVE VALID PRODUCT ID')
+
   let query = {
     text: INSERT_QUESTION,
     values: [product_id, body, date_written, asker_name, asker_email, reported, helpful]
@@ -96,6 +98,7 @@ const postQuestion = async (req, res) => {
 
 const updateQuestionHelpfulness = (req, res) => {
   let question_id = req.params.question_id
+  if(idIsInvalid(question_id)) return handleClientError(res, 'MUST HAVE VALID QUESTION ID')
   let query = {
     text: UPDATE_QUESTION_HELPFULNESS,
     values: [question_id]
@@ -109,6 +112,7 @@ const updateQuestionHelpfulness = (req, res) => {
 
 const reportQuestion = (req, res) => {
   let question_id = req.params.question_id
+  if(idIsInvalid(question_id)) return handleClientError(res, 'MUST HAVE VALID QUESTION ID')
   let query = {
     text: UPDATE_QUESTION_REPORTED,
     values: [question_id]
