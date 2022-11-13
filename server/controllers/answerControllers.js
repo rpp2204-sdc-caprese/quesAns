@@ -3,7 +3,8 @@ const {
   handlePostResponse,
   handlePutResponse,
   handleClientError,
-  handleError
+  handleError,
+  idIsInvalid
 } = require('./resHelpers.js')
 
 const {
