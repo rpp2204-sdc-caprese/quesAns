@@ -16,7 +16,7 @@ order by a.id
 limit $2 offset $3
 `
 
-const INSERT_ANSWERS = 'insert into answers(question_id, body, date_written, answerer_name, answerer_email, reported, helpful) values($1, $2, $3, $4, $5, $6, $7) returning id'
+const INSERT_ANSWER = 'insert into answers(question_id, body, date_written, answerer_name, answerer_email, reported, helpful) values($1, $2, $3, $4, $5, $6, $7) returning id'
 
 const INSERT_PHOTOS = 'insert into answers_photos(answer_id, url) values($1, $2)'
 
@@ -26,7 +26,7 @@ const UPDATE_ANSWERS_REPORTED = 'update answers set reported = true where id = $
 
 module.exports = {
   SELECT_ANSWERS,
-  INSERT_ANSWERS,
+  INSERT_ANSWER,
   INSERT_PHOTOS,
   UPDATE_ANSWERS_HELPFULNESS,
   UPDATE_ANSWERS_REPORTED
