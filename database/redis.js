@@ -6,16 +6,14 @@ const redisClient = Redis.createClient({
   url: URL
 })
 
-async function connect() {
-  try {
-    await redisClient.connect()
-  } catch(err) {
-    console.log(err)
-  }
-}
-
-connect()
-
-
+redisClient.connect()
+  .then(() => console.log('Redis is connected'))
+  .catch(err => {
+    if(err.message === 'Connection timeout') {
+      console.log('Redis: ' + err.message)
+    } else {
+      console.error(err)
+    }
+  })
 
 module.exports = redisClient
