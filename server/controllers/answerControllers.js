@@ -24,9 +24,9 @@ const getAnswers = async (req, res) => {
   let count = req.query.count || 5
   let page = req.query.page || 1
 
-  const product_id_is_invalid = product_id === undefined || parseInt(product_id) < 0 || product_id.length === 0
+  const productIdIsInvalid = product_id === undefined || parseInt(product_id) < 0 || product_id.length === 0
 
-  if(product_id_is_invalid) {
+  if(productIdIsInvalid) {
     return handleClientError(res, 'MUST HAVE VALID PRODUCT ID')
   }
 
