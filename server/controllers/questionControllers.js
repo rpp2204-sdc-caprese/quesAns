@@ -30,17 +30,20 @@ const getQuestions = async(req, res) => {
     return handleClientError(res, 'MUST HAVE VALID PRODUCT ID')
   }
 
+  const client = await pool.connect()
+
   try {
     let redisQuestionKey = `product_id=${product_id}&count=${count}&page=${page}`
     const cache = await getCache(redisQuestionKey)
     if(!!cache) {
       handleGetResponse(res, JSON.parse(cache))
     } else {
+
       let response = {
         product_id: product_id,
         results: []
       }
-
+      await client.query('BEGIN')
       let queryText =  SELECT_QUESTIONS_ANSWERS
       let offset = (page - 1) * count
       let query = {
@@ -49,36 +52,27 @@ const getQuestions = async(req, res) => {
         values: [product_id, count, offset]
       }
 
-      pool
-        .query(query)
-        .then(async(questions) => {
-          response.results = questions.rows
-          for(let i = 0; i < response.results.length; i++) {
-            for(let answer_id in response.results[i].answers) {
-              let query = {
-                text: SELECT_PHOTOS,
-                values: [answer_id]
-              }
-              let photo_urls = await pool.query(query)
-              response.results[i].answers[answer_id].photos = photo_urls.rows[0].photos
-            }
+      const questions = await client.query(query)
+      response.results = questions.rows
+      for(let i = 0; i < response.results.length; i++) {
+        for(let answer_id in response.results[i].answers) {
+          let query = {
+            text: SELECT_PHOTOS,
+            values: [answer_id]
           }
-          return response
-        })
-        .then(async(results) => {
-          if(results === undefined) {
-            throw new Error('Server Error')
-            return;
-          }
-          await setCache(redisQuestionKey, results)
-          handleGetResponse(res, results)
-        })
-        .catch(err => {
-          handleError(res, err)
-        })
+          let photo_urls = await client.query(query)
+          response.results[i].answers[answer_id].photos = photo_urls.rows[0].photos
+        }
+      }
+      await client.query('COMMIT')
+      await setCache(redisQuestionKey, JSON.stringify(response))
+      handleGetResponse(res, response)
     }
   } catch(err) {
+    await client.query('ROLLBACK')
     handleError(res, err)
+  } finally {
+    client.release()
   }
 }
 
