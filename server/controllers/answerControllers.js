@@ -62,8 +62,8 @@ const getAnswers = async (req, res) => {
 
 const postAnswer = async(req, res) => {
   let question_id = parseInt(req.params.question_id)
-  let { body, name, email } = req.body
-  let photos = req.body.rawPhotos
+  let { body, name, email, rawPhotos } = req.body.data
+  let photos = rawPhotos
   let date_written = new Date().toISOString()
   let reported = false
   let helpful = 0
