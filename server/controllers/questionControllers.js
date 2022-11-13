@@ -15,7 +15,6 @@ const {
 } = require('../../database/queries/queriesQuestions.js')
 
 const { getCache, setCache } = require('../../database/redisHelpers.js')
-
 const pool = require('../../database/db.js')
 
 
@@ -33,22 +32,22 @@ const getQuestions = async(req, res) => {
   const client = await pool.connect()
 
   try {
-    // let redisQuestionKey = `product_id=${product_id}&count=${count}&page=${page}`
-    // const cache = await getCache(redisQuestionKey)
-    // if(!!cache) {
-    //   handleGetResponse(res, JSON.parse(cache))
-    // } else {
+    let redisQuestionKey = `product_id=${product_id}&count=${count}&page=${page}`
+    const cache = await getCache(redisQuestionKey)
+    if(!!cache) {
+      handleGetResponse(res, JSON.parse(cache))
+    } else {
 
       let response = {
         product_id: product_id,
         results: []
       }
       await client.query('BEGIN')
-      let queryText =  SELECT_QUESTIONS_ANSWERS
+
       let offset = (page - 1) * count
       let selectQuesAns = {
         //name: 'getQuestionsAnswers',
-        text: queryText,
+        text: SELECT_QUESTIONS_ANSWERS,
         values: [product_id, count, offset]
       }
 
@@ -65,9 +64,9 @@ const getQuestions = async(req, res) => {
         }
       }
       await client.query('COMMIT')
-      // await setCache(redisQuestionKey, JSON.stringify(response))
+      await setCache(redisQuestionKey, JSON.stringify(response))
       handleGetResponse(res, response)
-    // }
+    }
   } catch(err) {
     await client.query('ROLLBACK')
     handleError(res, err)
@@ -94,7 +93,7 @@ const postQuestion = async (req, res) => {
 
   pool
     .query(query)
-    .then(results => handlePostResponse(res, JSON.stringify(results.rowCount)))
+    .then(results => handlePostResponse(res))
     .catch(err => handleClientError(res, err))
 }
 
