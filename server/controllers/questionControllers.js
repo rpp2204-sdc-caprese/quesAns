@@ -33,11 +33,11 @@ const getQuestions = async(req, res) => {
   const client = await pool.connect()
 
   try {
-    let redisQuestionKey = `product_id=${product_id}&count=${count}&page=${page}`
-    const cache = await getCache(redisQuestionKey)
-    if(!!cache) {
-      handleGetResponse(res, JSON.parse(cache))
-    } else {
+    // let redisQuestionKey = `product_id=${product_id}&count=${count}&page=${page}`
+    // const cache = await getCache(redisQuestionKey)
+    // if(!!cache) {
+    //   handleGetResponse(res, JSON.parse(cache))
+    // } else {
 
       let response = {
         product_id: product_id,
@@ -46,28 +46,28 @@ const getQuestions = async(req, res) => {
       await client.query('BEGIN')
       let queryText =  SELECT_QUESTIONS_ANSWERS
       let offset = (page - 1) * count
-      let query = {
+      let selectQuesAns = {
         //name: 'getQuestionsAnswers',
         text: queryText,
         values: [product_id, count, offset]
       }
 
-      const questions = await client.query(query)
+      const questions = await client.query(selectQuesAns)
       response.results = questions.rows
       for(let i = 0; i < response.results.length; i++) {
         for(let answer_id in response.results[i].answers) {
-          let query = {
+          let selectPhotos = {
             text: SELECT_PHOTOS,
             values: [answer_id]
           }
-          let photo_urls = await client.query(query)
+          let photo_urls = await client.query(selectPhotos)
           response.results[i].answers[answer_id].photos = photo_urls.rows[0].photos
         }
       }
       await client.query('COMMIT')
-      await setCache(redisQuestionKey, JSON.stringify(response))
+      // await setCache(redisQuestionKey, JSON.stringify(response))
       handleGetResponse(res, response)
-    }
+    // }
   } catch(err) {
     await client.query('ROLLBACK')
     handleError(res, err)
