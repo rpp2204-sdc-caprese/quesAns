@@ -7,10 +7,7 @@ const handleError = (res, err) => {
   res.status(500).send(err)
 }
 
-const idIsInvalid = (id) => {
-  return id === undefined || parseInt(id) < 0 || id.length === 0
-}
-
+const idIsInvalid = (id) => id === undefined || parseInt(id) < 0 || id.length === 0
 
 module.exports = {
   handleGetResponse,
