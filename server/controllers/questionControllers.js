@@ -3,7 +3,8 @@ const {
   handlePostResponse,
   handlePutResponse,
   handleClientError,
-  handleError
+  handleError,
+  idIsInvalid
 } = require('./resHelpers.js')
 
 const {
@@ -23,14 +24,9 @@ const getQuestions = async(req, res) => {
   let count = req.query.count || 5
   let page = req.query.page || 1
 
-  const productIdIsInvalid = product_id === undefined || parseInt(product_id) < 0 || product_id.length === 0
-
-  if(productIdIsInvalid) {
-    return handleClientError(res, 'MUST HAVE VALID PRODUCT ID')
-  }
+  if(idIsInvalid(product_id)) return handleClientError(res, 'MUST HAVE VALID PRODUCT ID')
 
   const client = await pool.connect()
-
   try {
     let redisQuestionKey = `product_id=${product_id}&count=${count}&page=${page}`
     const cache = await getCache(redisQuestionKey)
@@ -42,16 +38,16 @@ const getQuestions = async(req, res) => {
         product_id: product_id,
         results: []
       }
-      await client.query('BEGIN')
 
       let offset = (page - 1) * count
-      let selectQuesAns = {
+      let query_selectQuesAns = {
         //name: 'getQuestionsAnswers',
         text: SELECT_QUESTIONS_ANSWERS,
         values: [product_id, count, offset]
       }
 
-      const questions = await client.query(selectQuesAns)
+      await client.query('BEGIN')
+      const questions = await client.query(query_selectQuesAns)
       response.results = questions.rows
       for(let i = 0; i < response.results.length; i++) {
         for(let answer_id in response.results[i].answers) {
