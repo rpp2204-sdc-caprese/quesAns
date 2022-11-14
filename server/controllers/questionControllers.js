@@ -8,11 +8,11 @@ const {
 } = require('./resHelpers.js')
 
 const {
-  SELECT_QUESTIONS_ANSWERS,
-  SELECT_PHOTOS,
-  INSERT_QUESTION,
-  UPDATE_QUESTION_HELPFULNESS,
-  UPDATE_QUESTION_REPORTED
+  SELECT_QUESTIONS_ANSWERS_TEXT,
+  SELECT_PHOTOS_TEXT,
+  INSERT_QUESTION_TEXT,
+  UPDATE_QUESTION_HELPFULNESS_TEXT,
+  UPDATE_QUESTION_REPORTED_TEXT
 } = require('../../database/queries/queriesQuestions.js')
 
 const { getCache, setCache } = require('../../database/redisHelpers.js')
@@ -28,11 +28,11 @@ const getQuestions = async(req, res) => {
 
   const client = await pool.connect()
   try {
-    let redisQuestionKey = `product_id=${product_id}&count=${count}&page=${page}`
-    const cache = await getCache(redisQuestionKey)
-    if(!!cache) {
-      handleGetResponse(res, JSON.parse(cache))
-    } else {
+    // let redisQuestionKey = `product_id=${product_id}&count=${count}&page=${page}`
+    // const cache = await getCache(redisQuestionKey)
+    // if(!!cache) {
+    //   handleGetResponse(res, JSON.parse(cache))
+    // } else {
 
       let response = {
         product_id: product_id,
@@ -40,33 +40,30 @@ const getQuestions = async(req, res) => {
       }
 
       let offset = (page - 1) * count
-      let query_selectQuesAns = {
+      const SELECT_QUESTION_ANSWERS = {
         //name: 'getQuestionsAnswers',
-        text: SELECT_QUESTIONS_ANSWERS,
+        text: SELECT_QUESTIONS_ANSWERS_TEXT,
         values: [product_id, count, offset]
       }
 
-      await client.query('BEGIN')
-      const questions = await client.query(query_selectQuesAns)
+      const questions = await client.query(SELECT_QUESTION_ANSWERS)
       response.results = questions.rows
       for(let i = 0; i < response.results.length; i++) {
         for(let answer_id in response.results[i].answers) {
-          let selectPhotos = {
-            text: SELECT_PHOTOS,
+          const SELECT_PHOTOS = {
+            text: SELECT_PHOTOS_TEXT,
             values: [answer_id]
           }
-          let photo_urls = await client.query(selectPhotos)
+          let photo_urls = await client.query(SELECT_PHOTOS)
           response.results[i].answers[answer_id].photos = photo_urls.rows[0].photos
         }
       }
-      await client.query('COMMIT')
-      await setCache(redisQuestionKey, JSON.stringify(response))
+      // await setCache(redisQuestionKey, JSON.stringify(response))
       handleGetResponse(res, response)
-    }
+    //}
   } catch(err) {
-    await client.query('ROLLBACK')
     handleError(res, err)
-  } finally {
+   } finally {
     client.release()
   }
 }
@@ -84,13 +81,13 @@ const postQuestion = async (req, res) => {
 
   if(idIsInvalid(product_id)) return handleClientError(res, 'MUST HAVE VALID PRODUCT ID')
 
-  let query = {
-    text: INSERT_QUESTION,
+  const INSERT_QUESTION = {
+    text: INSERT_QUESTION_TEXT,
     values: [product_id, body, date_written, asker_name, asker_email, reported, helpful]
   }
 
   pool
-    .query(query)
+    .query(INSERT_QUESTION)
     .then(results => handlePostResponse(res))
     .catch(err => handleClientError(res, err))
 }
@@ -99,12 +96,12 @@ const postQuestion = async (req, res) => {
 const updateQuestionHelpfulness = (req, res) => {
   let question_id = req.params.question_id
   if(idIsInvalid(question_id)) return handleClientError(res, 'MUST HAVE VALID QUESTION ID')
-  let query = {
-    text: UPDATE_QUESTION_HELPFULNESS,
+  const UPDATE_QUESTION_HELPFULNESS = {
+    text: UPDATE_QUESTION_HELPFULNESS_TEXT,
     values: [question_id]
   }
   pool
-    .query(query)
+    .query(UPDATE_QUESTION_HELPFULNESS)
     .then(() => handlePutResponse(res))
     .catch(err => handleError(res, err))
 }
@@ -113,12 +110,12 @@ const updateQuestionHelpfulness = (req, res) => {
 const reportQuestion = (req, res) => {
   let question_id = req.params.question_id
   if(idIsInvalid(question_id)) return handleClientError(res, 'MUST HAVE VALID QUESTION ID')
-  let query = {
-    text: UPDATE_QUESTION_REPORTED,
+  const UPDATE_QUESTION_REPORTED = {
+    text: UPDATE_QUESTION_REPORTED_TEXT,
     values: [question_id]
   }
   pool
-    .query(query)
+    .query(UPDATE_QUESTION_REPORTED)
     .then(() => handlePutResponse(res))
     .catch(err => handleError(res, err))
 }
