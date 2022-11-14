@@ -28,11 +28,11 @@ const getQuestions = async(req, res) => {
 
   const client = await pool.connect()
   try {
-    // let redisQuestionKey = `product_id=${product_id}&count=${count}&page=${page}`
-    // const cache = await getCache(redisQuestionKey)
-    // if(!!cache) {
-    //   handleGetResponse(res, JSON.parse(cache))
-    // } else {
+    let redisQuestionKey = `product_id=${product_id}&count=${count}&page=${page}`
+    const cache = await getCache(redisQuestionKey)
+    if(!!cache) {
+      handleGetResponse(res, JSON.parse(cache))
+    } else {
 
       let response = {
         product_id: product_id,
@@ -41,7 +41,6 @@ const getQuestions = async(req, res) => {
 
       let offset = (page - 1) * count
       const SELECT_QUESTION_ANSWERS = {
-        //name: 'getQuestionsAnswers',
         text: SELECT_QUESTIONS_ANSWERS_TEXT,
         values: [product_id, count, offset]
       }
@@ -58,9 +57,9 @@ const getQuestions = async(req, res) => {
           response.results[i].answers[answer_id].photos = photo_urls.rows[0].photos
         }
       }
-      // await setCache(redisQuestionKey, JSON.stringify(response))
+      await setCache(redisQuestionKey, JSON.stringify(response))
       handleGetResponse(res, response)
-    //}
+    }
   } catch(err) {
     handleError(res, err)
    } finally {
