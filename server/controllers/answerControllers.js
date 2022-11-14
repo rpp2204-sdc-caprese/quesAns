@@ -20,7 +20,7 @@ const pool = require('../../database/db.js')
 
 
 const getAnswers = async (req, res) => {
-  let question_id = req.params.question_id
+  let question_id = parseInt(req.params.question_id)
   let count = req.query.count || 5
   let page = req.query.page || 1
 
