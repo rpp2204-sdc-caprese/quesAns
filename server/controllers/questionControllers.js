@@ -88,7 +88,7 @@ const postQuestion = async (req, res) => {
   pool
     .query(INSERT_QUESTION)
     .then(results => handlePostResponse(res))
-    .catch(err => handleClientError(res, err))
+    .catch(err => handleError(res, err))
 }
 
 
