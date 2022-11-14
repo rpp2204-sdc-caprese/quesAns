@@ -62,7 +62,7 @@ const getAnswers = async (req, res) => {
 
 const postAnswer = async(req, res) => {
   let question_id = parseInt(req.params.question_id)
-  let { body, name, email, rawPhotos } = req.body.data
+  let { body, name, email, rawPhotos } = req.body.data //Data from answer POST is in data property of req.body
   let photos = rawPhotos
   let date_written = new Date().toISOString()
   let reported = false
@@ -101,7 +101,7 @@ const postAnswer = async(req, res) => {
 
 
 const updateAnswerHelpfulness = (req, res) => {
-  let answer_id = req.params.answer_id
+  let answer_id = parseInt(req.params.answer_id)
   if(idIsInvalid(answer_id)) return handleClientError(res, 'MUST HAVE VALID ANSWER ID')
   const UPDATE_ANSWERS_HELPFULNESS = {
     text: UPDATE_ANSWERS_HELPFULNESS_TEXT,
@@ -115,7 +115,7 @@ const updateAnswerHelpfulness = (req, res) => {
 
 
 const reportAnswer = (req, res) => {
-  let answer_id = req.params.answer_id
+  let answer_id = parseInt(req.params.answer_id)
   if(idIsInvalid(answer_id)) return handleClientError(res, 'MUST HAVE VALID ANSWER ID')
   const UPDATE_ANSWERS_REPORTED = {
     text: UPDATE_ANSWERS_REPORTED_TEXT,

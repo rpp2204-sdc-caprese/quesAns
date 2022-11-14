@@ -93,7 +93,7 @@ const postQuestion = async (req, res) => {
 
 
 const updateQuestionHelpfulness = (req, res) => {
-  let question_id = req.params.question_id
+  let question_id = parseInt(req.params.question_id)
   if(idIsInvalid(question_id)) return handleClientError(res, 'MUST HAVE VALID QUESTION ID')
   const UPDATE_QUESTION_HELPFULNESS = {
     text: UPDATE_QUESTION_HELPFULNESS_TEXT,
@@ -107,7 +107,7 @@ const updateQuestionHelpfulness = (req, res) => {
 
 
 const reportQuestion = (req, res) => {
-  let question_id = req.params.question_id
+  let question_id = parseInt(req.params.question_id)
   if(idIsInvalid(question_id)) return handleClientError(res, 'MUST HAVE VALID QUESTION ID')
   const UPDATE_QUESTION_REPORTED = {
     text: UPDATE_QUESTION_REPORTED_TEXT,
