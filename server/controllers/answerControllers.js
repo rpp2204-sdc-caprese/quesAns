@@ -8,11 +8,11 @@ const {
 } = require('./resHelpers.js')
 
 const {
-  SELECT_ANSWERS,
-  INSERT_ANSWER,
-  INSERT_PHOTOS,
-  UPDATE_ANSWERS_HELPFULNESS,
-  UPDATE_ANSWERS_REPORTED
+  SELECT_ANSWERS_TEXT,
+  INSERT_ANSWER_TEXT,
+  INSERT_PHOTOS_TEXT,
+  UPDATE_ANSWERS_HELPFULNESS_TEXT,
+  UPDATE_ANSWERS_REPORTED_TEXT
 } = require('../../database/queries/queriesAnswers.js')
 
 const { getCache, setCache } = require('../../database/redisHelpers.js')
@@ -33,13 +33,13 @@ const getAnswers = async (req, res) => {
     //   handleGetResponse(res, JSON.parse(cache))
     // } else {
       let offset = (page - 1) * count
-      let selectAnswers = {
-        text: SELECT_ANSWERS,
+      const SELECT_ANSWERS = {
+        text: SELECT_ANSWERS_TEXT,
         values: [question_id, count, offset]
       }
 
       pool
-        .query(selectAnswers)
+        .query(SELECT_ANSWERS)
         .then(async(results) => {
           let response = {
             question: question_id,
@@ -73,19 +73,19 @@ const postAnswer = async(req, res) => {
   const client = await pool.connect()
   try {
     await client.query('BEGIN')
-    let insertAnswer = {
-      text: INSERT_ANSWER,
+    const INSERT_ANSWER = {
+      text: INSERT_ANSWER_TEXT,
       values: [question_id, body, date_written, name, email, reported, helpful]
     }
-    let result = await client.query(insertAnswer)
+    let result = await client.query(INSERT_ANSWER)
     let answer_id = result.rows[0].id
     let photoQueries = []
     for(let i = 0; i < photos.length; i++) {
-      let photoQuery = {
-        text: INSERT_PHOTOS,
+      const INSERT_PHOTOS = {
+        text: INSERT_PHOTOS_TEXT,
         values: [answer_id, photos[i]]
       }
-      photoQueries.push(client.query(photoQuery))
+      photoQueries.push(client.query(INSERT_PHOTOS))
     }
 
     await Promise.all(photoQueries)
@@ -103,12 +103,12 @@ const postAnswer = async(req, res) => {
 const updateAnswerHelpfulness = (req, res) => {
   let answer_id = req.params.answer_id
   if(idIsInvalid(answer_id)) return handleClientError(res, 'MUST HAVE VALID ANSWER ID')
-  let query = {
-    text: UPDATE_ANSWERS_HELPFULNESS,
+  const UPDATE_ANSWERS_HELPFULNESS = {
+    text: UPDATE_ANSWERS_HELPFULNESS_TEXT,
     values: [answer_id]
   }
   pool
-    .query(query)
+    .query(UPDATE_ANSWERS_HELPFULNESS)
     .then(() => handlePutResponse(res))
     .catch(err => handleError(res, err))
 }
@@ -117,12 +117,12 @@ const updateAnswerHelpfulness = (req, res) => {
 const reportAnswer = (req, res) => {
   let answer_id = req.params.answer_id
   if(idIsInvalid(answer_id)) return handleClientError(res, 'MUST HAVE VALID ANSWER ID')
-  let query = {
-    text: UPDATE_ANSWERS_REPORTED,
+  const UPDATE_ANSWERS_REPORTED = {
+    text: UPDATE_ANSWERS_REPORTED_TEXT,
     values: [answer_id]
   }
   pool
-    .query(query)
+    .query(UPDATE_ANSWERS_REPORTED)
     .then(() => handlePutResponse(res))
     .catch(err => handleError(res, err))
 }
