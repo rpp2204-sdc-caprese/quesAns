@@ -1,3 +1,4 @@
+/*****RESPONSE HANDLERS*****/
 const handleGetResponse = (res, data) => res.status(200).send(data)
 const handlePostResponse = (res) => res.sendStatus(201)
 const handlePutResponse = (res) => res.sendStatus(204)
@@ -6,8 +7,7 @@ const handleError = (res, err) => {
   console.log(err)
   res.status(500).send(err)
 }
-
-const idIsInvalid = (id) => id === undefined || parseInt(id) < 0 || id.length === 0 || isNaN(id) || isNaN(parseInt(id))
+const idIsInvalid = (id) => id === undefined || id < 0 || isNaN(id)
 
 module.exports = {
   handleGetResponse,
