@@ -1,4 +1,4 @@
-const SELECT_ANSWERS = `
+const SELECT_ANSWERS_TEXT = `
 SELECT
   a.id as answer_id, body, date_written as date, answerer_name, helpful as helpfulness,
   coalesce(json_agg(json_build_object(
@@ -16,19 +16,19 @@ order by a.id
 limit $2 offset $3
 `
 
-const INSERT_ANSWER = 'insert into answers(question_id, body, date_written, answerer_name, answerer_email, reported, helpful) values($1, $2, $3, $4, $5, $6, $7) returning id'
+const INSERT_ANSWER_TEXT = 'insert into answers(question_id, body, date_written, answerer_name, answerer_email, reported, helpful) values($1, $2, $3, $4, $5, $6, $7) returning id'
 
-const INSERT_PHOTOS = 'insert into answers_photos(answer_id, url) values($1, $2)'
+const INSERT_PHOTOS_TEXT = 'insert into answers_photos(answer_id, url) values($1, $2)'
 
-const UPDATE_ANSWERS_HELPFULNESS = 'update answers set helpful = helpful + 1 where id = $1'
+const UPDATE_ANSWERS_HELPFULNESS_TEXT = 'update answers set helpful = helpful + 1 where id = $1'
 
-const UPDATE_ANSWERS_REPORTED = 'update answers set reported = true where id = $1'
+const UPDATE_ANSWERS_REPORTED_TEXT = 'update answers set reported = true where id = $1'
 
 module.exports = {
-  SELECT_ANSWERS,
-  INSERT_ANSWER,
-  INSERT_PHOTOS,
-  UPDATE_ANSWERS_HELPFULNESS,
-  UPDATE_ANSWERS_REPORTED
+  SELECT_ANSWERS_TEXT,
+  INSERT_ANSWER_TEXT,
+  INSERT_PHOTOS_TEXT,
+  UPDATE_ANSWERS_HELPFULNESS_TEXT,
+  UPDATE_ANSWERS_REPORTED_TEXT
 }
 

@@ -1,4 +1,4 @@
-const SELECT_QUESTIONS_ANSWERS = `
+const SELECT_QUESTIONS_ANSWERS_TEXT = `
 SELECT
 q.id AS question_id,
 q.body AS question_body,
@@ -34,18 +34,18 @@ LIMIT
 OFFSET
   $3`
 
-const SELECT_PHOTOS = `select coalesce(array_agg(url), '{}') as photos from answers_photos where answer_id = $1`
+const SELECT_PHOTOS_TEXT = `select coalesce(array_agg(url), '{}') as photos from answers_photos where answer_id = $1`
 
-const INSERT_QUESTION = `insert into questions(product_id, body, date_written, asker_name, asker_email, reported, helpful) values($1, $2, $3, $4, $5, $6, $7)`
+const INSERT_QUESTION_TEXT = `insert into questions(product_id, body, date_written, asker_name, asker_email, reported, helpful) values($1, $2, $3, $4, $5, $6, $7)`
 
-const UPDATE_QUESTION_HELPFULNESS = 'update questions set helpful = helpful + 1 where id = $1'
+const UPDATE_QUESTION_HELPFULNESS_TEXT = 'update questions set helpful = helpful + 1 where id = $1'
 
-const UPDATE_QUESTION_REPORTED = 'update questions set reported = true where id = $1'
+const UPDATE_QUESTION_REPORTED_TEXT = 'update questions set reported = true where id = $1'
 
 module.exports = {
-  SELECT_QUESTIONS_ANSWERS,
-  SELECT_PHOTOS,
-  INSERT_QUESTION,
-  UPDATE_QUESTION_HELPFULNESS,
-  UPDATE_QUESTION_REPORTED
+  SELECT_QUESTIONS_ANSWERS_TEXT,
+  SELECT_PHOTOS_TEXT,
+  INSERT_QUESTION_TEXT,
+  UPDATE_QUESTION_HELPFULNESS_TEXT,
+  UPDATE_QUESTION_REPORTED_TEXT
 }
