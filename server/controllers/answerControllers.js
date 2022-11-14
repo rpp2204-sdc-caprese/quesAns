@@ -93,7 +93,7 @@ const postAnswer = async(req, res) => {
     handlePostResponse(res)
   } catch(err) {
     await client.query('ROLLBACK')
-    console.log(err)
+    handleError(res, err)
   } finally {
     client.release()
   }
