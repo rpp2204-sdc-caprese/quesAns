@@ -27,11 +27,11 @@ const getAnswers = async (req, res) => {
   if(idIsInvalid(question_id)) return handleClientError(res, 'MUST HAVE VALID QUESTION ID')
 
   try {
-    let redisAnswerKey = `question_id=${question_id}&count=${count}&page=${page}`;
-    const cache = await getCache(redisAnswerKey)
-    if(!!cache) {
-      handleGetResponse(res, JSON.parse(cache))
-    } else {
+    // let redisAnswerKey = `question_id=${question_id}&count=${count}&page=${page}`;
+    // const cache = await getCache(redisAnswerKey)
+    // if(!!cache) {
+    //   handleGetResponse(res, JSON.parse(cache))
+    // } else {
       let offset = (page - 1) * count
       const SELECT_ANSWERS = {
         text: SELECT_ANSWERS_TEXT,
@@ -47,13 +47,13 @@ const getAnswers = async (req, res) => {
             count: count,
           }
           response.results = results.rows
-          await setCache(redisAnswerKey, JSON.stringify(response))
+          // await setCache(redisAnswerKey, JSON.stringify(response))
           handleGetResponse(res, response)
         })
         .catch(err => {
           handleError(res, err)
         })
-    }
+    // }
   } catch(err) {
     handleError(res, err)
   }
