@@ -47,7 +47,7 @@ const getAnswers = async (req, res) => {
             count: count,
           }
           response.results = results.rows
-          await setCache(redisAnswerKey, JSON.stringify(response))
+          await setCache(redisAnswerKey, response)
           handleGetResponse(res, response)
         })
         .catch(err => {

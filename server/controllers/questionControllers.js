@@ -57,7 +57,7 @@ const getQuestions = async(req, res) => {
           response.results[i].answers[answer_id].photos = photo_urls.rows[0].photos
         }
       }
-      await setCache(redisQuestionKey, JSON.stringify(response))
+      await setCache(redisQuestionKey, response)
       handleGetResponse(res, response)
     }
   } catch(err) {
