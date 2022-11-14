@@ -9,7 +9,8 @@ const pool = new Pool({
     //host: HOST,
     user: USER,
     database: DB,
-    password: PASSWORD
+    password: PASSWORD,
+    max: 25
 })
 
 try {
