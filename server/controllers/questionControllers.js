@@ -16,6 +16,7 @@ const {
 } = require('../../database/queries/queriesQuestions.js')
 
 const { getCache, setCache } = require('../../database/redisHelpers.js')
+let { redisIsConnected } = require('../../database/redis.js')
 const pool = require('../../database/db.js')
 
 
@@ -28,11 +29,39 @@ const getQuestions = async(req, res) => {
 
   const client = await pool.connect()
   try {
-    let redisQuestionKey = `product_id=${product_id}&count=${count}&page=${page}`
-    const cache = await getCache(redisQuestionKey)
-    if(!!cache) {
-      handleGetResponse(res, JSON.parse(cache))
-    } else {
+    if(redisIsConnected) {
+      let redisQuestionKey = `product_id=${product_id}&count=${count}&page=${page}`
+      const cache = await getCache(redisQuestionKey)
+      if(!!cache) {
+        handleGetResponse(res, JSON.parse(cache))
+      } else {
+        let response = {
+          product_id: product_id,
+          results: []
+        }
+
+        let offset = (page - 1) * count
+        const SELECT_QUESTION_ANSWERS = {
+          text: SELECT_QUESTIONS_ANSWERS_TEXT,
+          values: [product_id, count, offset]
+        }
+
+        const questions = await client.query(SELECT_QUESTION_ANSWERS)
+        response.results = questions.rows
+        for(let i = 0; i < response.results.length; i++) {
+          for(let answer_id in response.results[i].answers) {
+            const SELECT_PHOTOS = {
+              text: SELECT_PHOTOS_TEXT,
+              values: [answer_id]
+            }
+            let photo_urls = await client.query(SELECT_PHOTOS)
+            response.results[i].answers[answer_id].photos = photo_urls.rows[0].photos
+          }
+        }
+        await setCache(redisQuestionKey, response)
+        handleGetResponse(res, response)
+      }
+    } else { //Redis is not connected
 
       let response = {
         product_id: product_id,
@@ -57,7 +86,6 @@ const getQuestions = async(req, res) => {
           response.results[i].answers[answer_id].photos = photo_urls.rows[0].photos
         }
       }
-      await setCache(redisQuestionKey, response)
       handleGetResponse(res, response)
     }
   } catch(err) {

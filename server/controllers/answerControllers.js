@@ -16,6 +16,7 @@ const {
 } = require('../../database/queries/queriesAnswers.js')
 
 const { getCache, setCache } = require('../../database/redisHelpers.js')
+let { redisIsConnected } = require('../../database/redis.js')
 const pool = require('../../database/db.js')
 
 
@@ -27,11 +28,12 @@ const getAnswers = async (req, res) => {
   if(idIsInvalid(question_id)) return handleClientError(res, 'MUST HAVE VALID QUESTION ID')
 
   try {
-    let redisAnswerKey = `question_id=${question_id}&count=${count}&page=${page}`;
-    const cache = await getCache(redisAnswerKey)
-    if(!!cache) {
-      handleGetResponse(res, JSON.parse(cache))
-    } else {
+    if(redisIsConnected) {
+      let redisAnswerKey = `question_id=${question_id}&count=${count}&page=${page}`;
+      const cache = await getCache(redisAnswerKey)
+      if(!!cache) {
+        handleGetResponse(res, JSON.parse(cache))
+      } else {
       let offset = (page - 1) * count
       const SELECT_ANSWERS = {
         text: SELECT_ANSWERS_TEXT,
@@ -48,6 +50,28 @@ const getAnswers = async (req, res) => {
           }
           response.results = results.rows
           await setCache(redisAnswerKey, response)
+          handleGetResponse(res, response)
+        })
+        .catch(err => {
+          handleError(res, err)
+        })
+      }
+    } else { //Redis is not connected
+      let offset = (page - 1) * count
+      const SELECT_ANSWERS = {
+        text: SELECT_ANSWERS_TEXT,
+        values: [question_id, count, offset]
+      }
+
+      pool
+        .query(SELECT_ANSWERS)
+        .then(async(results) => {
+          let response = {
+            question: question_id,
+            page: page,
+            count: count,
+          }
+          response.results = results.rows
           handleGetResponse(res, response)
         })
         .catch(err => {
