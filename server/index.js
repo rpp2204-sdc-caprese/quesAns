@@ -2,35 +2,21 @@ require('dotenv').config()
 const PORT = process.env.PORT
 const express = require('express')
 const morgan = require('morgan')
-const path = require('path')
-const fs = require('fs')
-const rt = require('file-stream-rotator')
-const Writable = require('stream').Writable
+const config = require('../logger/logger.js')
+
 const loaderio_verification_token = ''
 
-const {
-  getQuestions,
-  postQuestion,
-  updateQuestionHelpfulness,
-  reportQuestion
-} = require('./controllers/questionControllers.js')
+/****CONTROLLERS****/
+const { getQuestions, postQuestion, updateQuestionHelpfulness, reportQuestion } = require('./controllers/questionControllers.js')
+const { getAnswers, postAnswer, updateAnswerHelpfulness, reportAnswer } = require('./controllers/answerControllers.js')
 
-const {
-    getAnswers,
-    postAnswer,
-    updateAnswerHelpfulness,
-    reportAnswer
-} = require('./controllers/answerControllers.js')
-
-//morgan error logger
-let fileWriter = rt.getStream({filename:'errors.log', frequency:'daily', verbose: true})
-const skipSuccess = (req, res) => res.statusCode < 400
-
+/****MIDDLEWARE****/
 const app = express()
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
-app.use(morgan('combined', { skip: skipSuccess, stream: fileWriter }))
+app.use(morgan('combined', config))
 
+/****ROUTES****/
 app.route('/qa/questions')
   .get(getQuestions)
   .post(postQuestion)
@@ -48,6 +34,7 @@ app.get(`/${loaderio_verification_token}.txt`, (req, res) => {
     res.send(loaderio_verification_token)
 })
 
+/****SERVER****/
 app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}`)
 })
