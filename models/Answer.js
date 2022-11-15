@@ -1,5 +1,5 @@
 const pool = require('../database/db.js');
-const AnsQuery = require('../database/queries/AnsQuery.js')
+const AnsQuery = require('./queries/AnsQuery.js')
 
 
 const Answer = {}
