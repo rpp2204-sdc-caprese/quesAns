@@ -1,6 +1,6 @@
 require('dotenv').config()
 const PORT = process.env.PORT
-const express = require('express')
+const app = require('express')()
 const morgan = require('morgan')
 const config = require('../logger/logger.js')
 
@@ -11,7 +11,6 @@ const { getQuestions, postQuestion, updateQuestionHelpfulness, reportQuestion } 
 const { getAnswers, postAnswer, updateAnswerHelpfulness, reportAnswer } = require('./controllers/answerControllers.js')
 
 /****MIDDLEWARE****/
-const app = express()
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 app.use(morgan('combined', config))
