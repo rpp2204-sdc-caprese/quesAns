@@ -1,6 +1,7 @@
 require('dotenv').config()
 const PORT = process.env.PORT
-const app = require('express')()
+const express = require('express')
+const app = express()
 const morgan = require('morgan')
 const config = require('../logger/logger.js')
 
