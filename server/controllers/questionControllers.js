@@ -1,13 +1,6 @@
-const {
-  handleGetResponse,
-  handlePostResponse,
-  handlePutResponse,
-  handleClientError,
-  handleError,
-  idIsInvalid
-} = require('./helpers/resHelpers.js')
-
 const Question = require('../../models/Question.js')
+const { handleGetResponse, handlePostResponse, handlePutResponse, handleClientError, handleError, } = require('./helpers/resHelpers.js')
+const { idIsInvalid } = require('./helpers/invalid_id_handler.js')
 const { getCache, setCache, CheckRedis } = require('../../database/redisHelpers.js')
 
 
