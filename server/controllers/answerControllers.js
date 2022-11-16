@@ -8,7 +8,7 @@ const {
 } = require('./resHelpers.js')
 
 const Answer = require('../../models/Answer.js')
-const { getCache, setCache } = require('../../database/redisHelpers.js')
+const { getCache, setCache, CheckRedis } = require('../../database/redisHelpers.js')
 
 
 const getAnswers = async (req, res) => {
@@ -17,30 +17,41 @@ const getAnswers = async (req, res) => {
   let page = req.query.page || 1
   let offset = (page - 1) * count
 
+  let response = {
+    question: question_id,
+    page: page,
+    count: count,
+  }
+
   if(idIsInvalid(question_id)) return handleClientError(res, 'MUST HAVE VALID QUESTION ID')
 
   try {
-    // let redisAnswerKey = `question_id=${question_id}&count=${count}&page=${page}`;
-    // const cache = await getCache(redisAnswerKey)
-    // if(!!cache) {
-    //   handleGetResponse(res, JSON.parse(cache))
-    // } else {
-
+    if(CheckRedis.isReady()) {
+      let redisAnswerKey = `question_id=${question_id}&count=${count}&page=${page}`;
+      const cache = await getCache(redisAnswerKey)
+      if(!!cache) {
+        handleGetResponse(res, JSON.parse(cache))
+      } else /*RESULT IS NOT CACHED*/ {
+        Answer.get(question_id, count, offset)
+          .then(async(results) => {
+            response.results = results.rows
+            setCache(redisAnswerKey, response)
+            handleGetResponse(res, response)
+          })
+          .catch(err => {
+            handleError(res, err)
+          })
+      }
+    } else /*REDIS IS NOT CONNECTED*/ {
       Answer.get(question_id, count, offset)
-        .then(async(results) => {
-          let response = {
-            question: question_id,
-            page: page,
-            count: count,
-          }
-          response.results = results.rows
-          //await setCache(redisAnswerKey, response)
-          handleGetResponse(res, response)
-        })
-        .catch(err => {
-          handleError(res, err)
-        })
-    // }
+      .then(async(results) => {
+        response.results = results.rows
+        handleGetResponse(res, response)
+      })
+      .catch(err => {
+        handleError(res, err)
+      })
+    }
   } catch(err) {
     handleError(res, err)
   }
