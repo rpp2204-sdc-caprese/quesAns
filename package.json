@@ -2,7 +2,7 @@
   "name": "quesans",
   "version": "1.0.0",
   "description": "",
-  "main": "test.js",
+  "main": "server/index.js",
   "scripts": {
     "start": "nodemon server/index.js",
     "test": "jest"
