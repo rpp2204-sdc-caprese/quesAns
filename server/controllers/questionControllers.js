@@ -16,7 +16,7 @@ const getQuestions = async(req, res) => {
     results: []
   }
 
-  if(idIsInvalid(product_id)) return handleClientError(res, 'MUST HAVE VALID PRODUCT ID')
+  if(idIsInvalid(product_id)) return handleClientError(res, INVALID_ID_MESSAGE)
 
   try {
     if(CheckRedis.isReady()) {
@@ -61,7 +61,7 @@ const postQuestion = async (req, res) => {
   let reported = false;
   let helpful = 0;
 
-  if(idIsInvalid(product_id)) return handleClientError(res, 'MUST HAVE VALID PRODUCT ID')
+  if(idIsInvalid(product_id)) return handleClientError(res, INVALID_ID_MESSAGE)
 
   let values = [product_id, body, date_written, asker_name, asker_email, reported, helpful]
   Question.create(values)
@@ -72,7 +72,7 @@ const postQuestion = async (req, res) => {
 
 const updateQuestionHelpfulness = (req, res) => {
   let question_id = parseInt(req.params.question_id)
-  if(idIsInvalid(question_id)) return handleClientError(res, 'MUST HAVE VALID QUESTION ID')
+  if(idIsInvalid(question_id)) return handleClientError(res, INVALID_ID_MESSAGE)
   Question.updateHelpfulness(question_id)
     .then(() => handlePutResponse(res))
     .catch(err => handleError(res, err))
@@ -81,7 +81,7 @@ const updateQuestionHelpfulness = (req, res) => {
 
 const reportQuestion = (req, res) => {
   let question_id = parseInt(req.params.question_id)
-  if(idIsInvalid(question_id)) return handleClientError(res, 'MUST HAVE VALID QUESTION ID')
+  if(idIsInvalid(question_id)) return handleClientError(res, INVALID_ID_MESSAGE)
   Question.updateReported(question_id)
     .then(() => handlePutResponse(res))
     .catch(err => handleError(res, err))
