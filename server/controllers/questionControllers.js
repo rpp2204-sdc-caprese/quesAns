@@ -25,7 +25,7 @@ const getQuestions = async(req, res) => {
       if(!!cache) {
         handleGetResponse(res, JSON.parse(cache))
       } else /*RESULT IS NOT CACHED*/ {
-        Question.get(product_id, count, offset)
+        Question.getQuestions(product_id, count, offset)
         .then(async(results) => {
           response.results = results;
           await setCache(redisQuestionKey, response)
@@ -36,7 +36,7 @@ const getQuestions = async(req, res) => {
         })
       }
     } else /*REDIS IS NOT CONNECTED*/ {
-      Question.get(product_id, count, offset)
+      Question.getQuestions(product_id, count, offset)
         .then(results => {
           response.results = results;
           handleGetResponse(res, response)
@@ -64,7 +64,7 @@ const postQuestion = async (req, res) => {
   if(idIsInvalid(product_id)) return handleClientError(res, INVALID_ID_MESSAGE)
 
   let values = [product_id, body, date_written, asker_name, asker_email, reported, helpful]
-  Question.create(values)
+  Question.addNewQuestion(values)
     .then(()=> handlePostResponse(res))
     .catch(err => handleError(res, err))
 }
@@ -73,7 +73,7 @@ const postQuestion = async (req, res) => {
 const updateQuestionHelpfulness = (req, res) => {
   let question_id = parseInt(req.params.question_id)
   if(idIsInvalid(question_id)) return handleClientError(res, INVALID_ID_MESSAGE)
-  Question.updateHelpfulness(question_id)
+  Question.markQuestionAsHelpful(question_id)
     .then(() => handlePutResponse(res))
     .catch(err => handleError(res, err))
 }
@@ -82,7 +82,7 @@ const updateQuestionHelpfulness = (req, res) => {
 const reportQuestion = (req, res) => {
   let question_id = parseInt(req.params.question_id)
   if(idIsInvalid(question_id)) return handleClientError(res, INVALID_ID_MESSAGE)
-  Question.updateReported(question_id)
+  Question.reportQuestion(question_id)
     .then(() => handlePutResponse(res))
     .catch(err => handleError(res, err))
 }
