@@ -26,9 +26,9 @@ const getQuestions = async(req, res) => {
         handleGetResponse(res, JSON.parse(cache))
       } else /*RESULT IS NOT CACHED*/ {
         Question.get(product_id, count, offset)
-        .then(results => {
+        .then(async(results) => {
           response.results = results;
-          setCache(redisQuestionKey, response)
+          await setCache(redisQuestionKey, response)
           handleGetResponse(res, response)
         })
         .catch(err => {
