@@ -8,7 +8,7 @@ const {
 } = require('./resHelpers.js')
 
 const Question = require('../../models/Question.js')
-const { getCache, setCache } = require('../../database/redisHelpers.js')
+const { getCache, setCache, CheckRedis } = require('../../database/redisHelpers.js')
 
 
 const getQuestions = async(req, res) => {
@@ -17,30 +17,40 @@ const getQuestions = async(req, res) => {
   let page = req.query.page || 1
   let offset = (page - 1) * count
 
+  let response = {
+    product_id: product_id,
+    results: []
+  }
+
   if(idIsInvalid(product_id)) return handleClientError(res, 'MUST HAVE VALID PRODUCT ID')
 
   try {
-    // let redisQuestionKey = `product_id=${product_id}&count=${count}&page=${page}`
-    // const cache = await getCache(redisQuestionKey)
-    // if(!!cache) {
-    //   handleGetResponse(res, JSON.parse(cache))
-    // } else {
-
-      let response = {
-        product_id: product_id,
-        results: []
-      }
-
-      Question.get(product_id, count, offset)
+    if(CheckRedis.isReady()) {
+      let redisQuestionKey = `product_id=${product_id}&count=${count}&page=${page}`
+      const cache = await getCache(redisQuestionKey)
+      if(!!cache) {
+        handleGetResponse(res, JSON.parse(cache))
+      } else /*RESULT IS NOT CACHED*/ {
+        Question.get(product_id, count, offset)
         .then(results => {
           response.results = results;
-          //await setCache(redisQuestionKey, response)
+          setCache(redisQuestionKey, response)
           handleGetResponse(res, response)
         })
         .catch(err => {
           handleError(err)
         })
-    //}
+      }
+    } else /*REDIS IS NOT CONNECTED*/ {
+      Question.get(product_id, count, offset)
+        .then(results => {
+          response.results = results;
+          handleGetResponse(res, response)
+        })
+        .catch(err => {
+          handleError(err)
+        })
+    }
   } catch(err) {
     handleError(res, err)
    }
