@@ -25,7 +25,7 @@ const getAnswers = async (req, res) => {
       if(!!cache) {
         handleGetResponse(res, JSON.parse(cache))
       } else /*RESULT IS NOT CACHED*/ {
-        Answer.get(question_id, count, offset)
+        Answer.getAnswers(question_id, count, offset)
           .then(async(results) => {
             response.results = results.rows
             await setCache(redisAnswerKey, response)
@@ -36,7 +36,7 @@ const getAnswers = async (req, res) => {
           })
       }
     } else /*REDIS IS NOT CONNECTED*/ {
-      Answer.get(question_id, count, offset)
+      Answer.getAnswers(question_id, count, offset)
       .then(results => {
         response.results = results.rows
         handleGetResponse(res, response)
@@ -62,7 +62,7 @@ const postAnswer = async(req, res) => {
 
   try {
     let values = [question_id, body, date_written, name, email, reported, helpful]
-    await Answer.create(values, rawPhotos)
+    await Answer.addNewAnswer(values, rawPhotos)
     handlePostResponse(res)
   } catch(err) {
     handleError(res, err)
@@ -73,7 +73,7 @@ const postAnswer = async(req, res) => {
 const updateAnswerHelpfulness = (req, res) => {
   let answer_id = parseInt(req.params.answer_id)
   if(idIsInvalid(answer_id)) return handleClientError(res, INVALID_ID_MESSAGE)
-  Answer.updateHelpfulness(answer_id)
+  Answer.markAnswerAsHelpful(answer_id)
     .then(() => handlePutResponse(res))
     .catch(err => handleError(res, err))
 }
@@ -82,7 +82,7 @@ const updateAnswerHelpfulness = (req, res) => {
 const reportAnswer = (req, res) => {
   let answer_id = parseInt(req.params.answer_id)
   if(idIsInvalid(answer_id)) return handleClientError(res, INVALID_ID_MESSAGE)
-  Answer.updateReported(answer_id)
+  Answer.reportAnswer(answer_id)
     .then(() => handlePutResponse(res))
     .catch(err => handleError(res, err))
 }
