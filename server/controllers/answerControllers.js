@@ -28,7 +28,7 @@ const getAnswers = async (req, res) => {
         Answer.get(question_id, count, offset)
           .then(async(results) => {
             response.results = results.rows
-            setCache(redisAnswerKey, response)
+            await setCache(redisAnswerKey, response)
             handleGetResponse(res, response)
           })
           .catch(err => {
@@ -37,7 +37,7 @@ const getAnswers = async (req, res) => {
       }
     } else /*REDIS IS NOT CONNECTED*/ {
       Answer.get(question_id, count, offset)
-      .then(async(results) => {
+      .then(results => {
         response.results = results.rows
         handleGetResponse(res, response)
       })
