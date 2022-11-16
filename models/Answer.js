@@ -4,11 +4,11 @@ const AnsQuery = require('./queries/AnsQuery.js')
 
 const Answer = {}
 
-Answer.get = (question_id, count, offset) => {
+Answer.getAnswers = (question_id, count, offset) => {
   return pool.query(AnsQuery.select(), [question_id, count, offset])
 }
 
-Answer.create = async(values, photos) => {
+Answer.addNewAnswer = async(values, photos) => {
   const client = await pool.connect()
   try {
     await client.query('BEGIN')
@@ -30,11 +30,11 @@ Answer.create = async(values, photos) => {
   }
 }
 
-Answer.updateHelpfulness = (answer_id) => {
+Answer.markAnswerAsHelpful = (answer_id) => {
   return pool.query(AnsQuery.updateHelpfulness(), [answer_id])
 }
 
-Answer.updateReported = (answer_id) => {
+Answer.reportAnswer = (answer_id) => {
   return pool.query(AnsQuery.updateReported(), [answer_id])
 }
 
