@@ -1,7 +1,8 @@
-const { handleGetResponse, handlePostResponse, handlePutResponse, handleClientError, handleError, idIsInvalid } = require('./helpers/resHelpers.js')
 const Answer = require('../../models/Answer.js')
+const { handleGetResponse, handlePostResponse, handlePutResponse, handleClientError, handleError } = require('./helpers/resHelpers.js')
+const { idIsInvalid , getInvalidIdMessage } = require('./helpers/idHelpers.js')
 const { getCache, setCache, CheckRedis } = require('../../database/redisHelpers.js')
-const INVALID_ID_MESSAGE = 'INVALID ID'
+const INVALID_ID_MESSAGE = getInvalidIdMessage()
 
 const getAnswers = async (req, res) => {
   let question_id = parseInt(req.params.question_id)
@@ -71,7 +72,7 @@ const postAnswer = async(req, res) => {
 
 const updateAnswerHelpfulness = (req, res) => {
   let answer_id = parseInt(req.params.answer_id)
-  if(idIsInvalid(answer_id)) return handleClientError(res, 'MUST HAVE VALID ANSWER ID')
+  if(idIsInvalid(answer_id)) return handleClientError(res, INVALID_ID_MESSAGE)
   Answer.updateHelpfulness(answer_id)
     .then(() => handlePutResponse(res))
     .catch(err => handleError(res, err))
@@ -80,7 +81,7 @@ const updateAnswerHelpfulness = (req, res) => {
 
 const reportAnswer = (req, res) => {
   let answer_id = parseInt(req.params.answer_id)
-  if(idIsInvalid(answer_id)) return handleClientError(res, 'MUST HAVE VALID ANSWER ID')
+  if(idIsInvalid(answer_id)) return handleClientError(res, INVALID_ID_MESSAGE)
   Answer.updateReported(answer_id)
     .then(() => handlePutResponse(res))
     .catch(err => handleError(res, err))
