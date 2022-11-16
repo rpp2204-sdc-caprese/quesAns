@@ -19,7 +19,7 @@ const getAnswers = async (req, res) => {
   if(idIsInvalid(question_id)) return handleClientError(res, INVALID_ID_MESSAGE)
 
   try {
-    if(CheckRedis.isReady()) {
+    if(CheckRedis.isReady()) /*REDIS IS CONNECTED*/ {
       let redisAnswerKey = `question_id=${question_id}&count=${count}&page=${page}`;
       const cache = await getCache(redisAnswerKey)
       if(!!cache) {
