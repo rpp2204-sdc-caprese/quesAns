@@ -1,7 +1,8 @@
 const Question = require('../../models/Question.js')
 const { handleGetResponse, handlePostResponse, handlePutResponse, handleClientError, handleError, } = require('./helpers/resHelpers.js')
-const { idIsInvalid } = require('./helpers/idHelpers.js')
+const { idIsInvalid, getInvalidIdMessage } = require('./helpers/idHelpers.js')
 const { getCache, setCache, CheckRedis } = require('../../database/redisHelpers.js')
+const INVALID_ID_MESSAGE = getInvalidIdMessage()
 
 
 const getQuestions = async(req, res) => {
