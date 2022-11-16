@@ -3,7 +3,7 @@ const QuesQuery = require('./queries/QuesQuery.js')
 
 const Question = {}
 
-Question.get = async(product_id, count, offset) => {
+Question.getQuestions = async(product_id, count, offset) => {
   const client = await pool.connect()
   let results = [];
   return client
@@ -26,15 +26,15 @@ Question.get = async(product_id, count, offset) => {
     .finally(() => client.release())
 }
 
-Question.create = (values) => {
+Question.addNewQuestion = (values) => {
   return pool.query(QuesQuery.insert(), values)
 }
 
-Question.updateHelpfulness = (question_id) => {
+Question.markQuestionAsHelpful = (question_id) => {
   return pool.query(QuesQuery.updateHelpfulness(), [question_id])
 }
 
-Question.updateReported = (question_id) => {
+Question.reportQuestion = (question_id) => {
   return pool.query(QuesQuery.updateReported(), [question_id])
 }
 
