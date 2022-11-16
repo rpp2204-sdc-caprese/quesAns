@@ -1,15 +1,7 @@
-const {
-  handleGetResponse,
-  handlePostResponse,
-  handlePutResponse,
-  handleClientError,
-  handleError,
-  idIsInvalid
-} = require('./resHelpers.js')
-
+const { handleGetResponse, handlePostResponse, handlePutResponse, handleClientError, handleError, idIsInvalid } = require('./helpers/resHelpers.js')
 const Answer = require('../../models/Answer.js')
 const { getCache, setCache, CheckRedis } = require('../../database/redisHelpers.js')
-
+const INVALID_ID_MESSAGE = 'INVALID ID'
 
 const getAnswers = async (req, res) => {
   let question_id = parseInt(req.params.question_id)
@@ -23,7 +15,7 @@ const getAnswers = async (req, res) => {
     count: count,
   }
 
-  if(idIsInvalid(question_id)) return handleClientError(res, 'MUST HAVE VALID QUESTION ID')
+  if(idIsInvalid(question_id)) return handleClientError(res, INVALID_ID_MESSAGE)
 
   try {
     if(CheckRedis.isReady()) {
@@ -65,7 +57,7 @@ const postAnswer = async(req, res) => {
   let reported = false
   let helpful = 0
 
-  if(idIsInvalid(question_id)) return handleClientError(res, 'MUST HAVE VALID QUESTION ID')
+  if(idIsInvalid(question_id)) return handleClientError(res, INVALID_ID_MESSAGE)
 
   try {
     let values = [question_id, body, date_written, name, email, reported, helpful]

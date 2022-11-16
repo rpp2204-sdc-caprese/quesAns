@@ -5,7 +5,7 @@ const {
   handleClientError,
   handleError,
   idIsInvalid
-} = require('./resHelpers.js')
+} = require('./helpers/resHelpers.js')
 
 const Question = require('../../models/Question.js')
 const { getCache, setCache, CheckRedis } = require('../../database/redisHelpers.js')
