@@ -14,5 +14,4 @@ module.exports = {
   handlePutResponse,
   handleClientError,
   handleError,
-  idIsInvalid
 }
