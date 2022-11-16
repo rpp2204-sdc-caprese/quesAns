@@ -19,7 +19,6 @@ Question.getQuestions = async(product_id, count, offset) => {
         return results;
     })
     .catch(err => {
-      client.query('ROLLBACK')
       console.log('There was an issue retrieving the data')
       return err;
     })
