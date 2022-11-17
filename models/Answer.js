@@ -20,13 +20,12 @@ Answer.addNewAnswer = async(values, photos) => {
     }
     await Promise.all(photoQueries)
     await client.query('COMMIT')
-    return;
   } catch(err) {
     await client.query('ROLLBACK')
     console.error('There was an error during database transaction')
     return err;
   } finally {
-    return client.release();
+    client.release();
   }
 }
 
