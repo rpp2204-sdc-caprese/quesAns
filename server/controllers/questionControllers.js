@@ -1,7 +1,7 @@
 const Question = require('../../models/Question.js')
 const { handleGetResponse, handlePostResponse, handlePutResponse, handleClientError, handleError } = require('./helpers/resHelpers.js')
-const { getCache, setCache, CheckRedis } = require('../../database/redisHelpers.js')
-const redisIsReady = CheckRedis.isReady()
+const { setCache, isRedisReady } = require('../../database/redisHelpers.js')
+let redisIsReady = isRedisReady()
 
 
 const getQuestions = (req, res) => {
