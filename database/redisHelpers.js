@@ -11,7 +11,7 @@ const Redis = {
   },
 
   setCache: async(key, value) => {
-    await redisClient.set(key, SECONDS_TIL_EXPIRATION, JSON.stringify(value))
+    await redisClient.setex(key, SECONDS_TIL_EXPIRATION, JSON.stringify(value))
   }
 }
 
