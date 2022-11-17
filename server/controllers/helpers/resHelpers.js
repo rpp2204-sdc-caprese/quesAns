@@ -13,5 +13,5 @@ module.exports = {
   handlePostResponse,
   handlePutResponse,
   handleClientError,
-  handleError,
+  handleError
 }
