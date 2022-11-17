@@ -10,6 +10,7 @@ const loaderio_verification_token = ''
 /****CONTROLLERS****/
 const { getQuestions, postQuestion, updateQuestionHelpfulness, reportQuestion } = require('./controllers/questionControllers.js')
 const { getAnswers, postAnswer, updateAnswerHelpfulness, reportAnswer } = require('./controllers/answerControllers.js')
+const { checkCache } = require('./controllers/checkCache.js')
 
 /****MIDDLEWARE****/
 app.use(express.json())
@@ -18,11 +19,11 @@ app.use(morgan('combined', config))
 
 /****ROUTES****/
 app.route('/qa/questions')
-  .get(getQuestions)
+  .get(checkCache, getQuestions)
   .post(postQuestion)
 
 app.route('/qa/questions/:question_id/answers')
-  .get(getAnswers)
+  .get(checkCache, getAnswers)
   .post(postAnswer)
 
 app.put('/qa/questions/:question_id/helpful', updateQuestionHelpfulness)
