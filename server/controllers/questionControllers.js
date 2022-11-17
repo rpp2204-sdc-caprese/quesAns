@@ -11,37 +11,29 @@ const getQuestions = async(req, res) => {
   let count = req.query.count || 5
   let page = req.query.page || 1
   let offset = (page - 1) * count
+  if(idIsInvalid(product_id)) return handleClientError(res, INVALID_ID_MESSAGE)
 
   let response = {
     product_id: product_id,
     results: []
   }
 
-  console.log(req.redisQuestionKey)
-
-  if(idIsInvalid(product_id)) return handleClientError(res, INVALID_ID_MESSAGE)
-
-  try {
-      Question.getQuestions(product_id, count, offset)
-        .then(async(results) => {
-          response.results = results;
-          if(redisIsReady) {
-            let { redisQuestionKey } = req
-            await setCache(redisQuestionKey, response)
-          }
-          handleGetResponse(res, response)
-        })
-        .catch(err => {
-          /*TODO: ADD ERROR CONDITION FOR SETTING CACHE ERROR THAT DOES NOT SEND 500*/
-          handleError(err)
-        })
-  } catch(err) {
-    handleError(res, err)
-   }
+  Question
+    .getQuestions(product_id, count, offset)
+    .then(async(results) => {
+      response.results = results;
+      if(redisIsReady) {
+        let { redisQuestionKey } = req
+        await setCache(redisQuestionKey, response)
+      }
+      handleGetResponse(res, response)
+    })
+    /*TODO: ADD ERROR CONDITION FOR SETTING CACHE ERROR THAT DOES NOT SEND ADDITIONAL 500, CURRENTLY DEPENDENT ON SUCCESSFUL CACHE*/
+    .catch(err => handleError(err))
 }
 
 
-const postQuestion = async (req, res) => {
+const postQuestion = (req, res) => {
   let question = req.body;
   let product_id = parseInt(question.product_id)
   let body = question.body
@@ -54,7 +46,8 @@ const postQuestion = async (req, res) => {
   if(idIsInvalid(product_id)) return handleClientError(res, INVALID_ID_MESSAGE)
 
   let values = [product_id, body, date_written, asker_name, asker_email, reported, helpful]
-  Question.addNewQuestion(values)
+  Question
+    .addNewQuestion(values)
     .then(()=> handlePostResponse(res))
     .catch(err => handleError(res, err))
 }
@@ -63,7 +56,8 @@ const postQuestion = async (req, res) => {
 const updateQuestionHelpfulness = (req, res) => {
   let question_id = parseInt(req.params.question_id)
   if(idIsInvalid(question_id)) return handleClientError(res, INVALID_ID_MESSAGE)
-  Question.markQuestionAsHelpful(question_id)
+  Question
+    .markQuestionAsHelpful(question_id)
     .then(() => handlePutResponse(res))
     .catch(err => handleError(res, err))
 }
@@ -72,7 +66,8 @@ const updateQuestionHelpfulness = (req, res) => {
 const reportQuestion = (req, res) => {
   let question_id = parseInt(req.params.question_id)
   if(idIsInvalid(question_id)) return handleClientError(res, INVALID_ID_MESSAGE)
-  Question.reportQuestion(question_id)
+  Question
+    .reportQuestion(question_id)
     .then(() => handlePutResponse(res))
     .catch(err => handleError(res, err))
 }
