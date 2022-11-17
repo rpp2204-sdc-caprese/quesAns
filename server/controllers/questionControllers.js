@@ -3,6 +3,7 @@ const { handleGetResponse, handlePostResponse, handlePutResponse, handleClientEr
 const { idIsInvalid, getInvalidIdMessage } = require('./helpers/idHelpers.js')
 const { getCache, setCache, CheckRedis } = require('../../database/redisHelpers.js')
 const INVALID_ID_MESSAGE = getInvalidIdMessage()
+const redisIsReady = CheckRedis.isReady()
 
 
 const getQuestions = async(req, res) => {
@@ -16,35 +17,24 @@ const getQuestions = async(req, res) => {
     results: []
   }
 
+  console.log(req.redisQuestionKey)
+
   if(idIsInvalid(product_id)) return handleClientError(res, INVALID_ID_MESSAGE)
 
   try {
-    if(CheckRedis.isReady()) /*REDIS IS CONNECTED*/ {
-      let redisQuestionKey = `product_id=${product_id}&count=${count}&page=${page}`
-      const cache = await getCache(redisQuestionKey)
-      if(!!cache) {
-        handleGetResponse(res, JSON.parse(cache))
-      } else /*RESULT IS NOT CACHED*/ {
-        Question.getQuestions(product_id, count, offset)
+      Question.getQuestions(product_id, count, offset)
         .then(async(results) => {
           response.results = results;
-          await setCache(redisQuestionKey, response)
+          if(redisIsReady) {
+            let { redisQuestionKey } = req
+            await setCache(redisQuestionKey, response)
+          }
           handleGetResponse(res, response)
         })
         .catch(err => {
+          /*TODO: ADD ERROR CONDITION FOR SETTING CACHE ERROR THAT DOES NOT SEND 500*/
           handleError(err)
         })
-      }
-    } else /*REDIS IS NOT CONNECTED*/ {
-      Question.getQuestions(product_id, count, offset)
-        .then(results => {
-          response.results = results;
-          handleGetResponse(res, response)
-        })
-        .catch(err => {
-          handleError(err)
-        })
-    }
   } catch(err) {
     handleError(res, err)
    }

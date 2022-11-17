@@ -3,6 +3,7 @@ const { handleGetResponse, handlePostResponse, handlePutResponse, handleClientEr
 const { idIsInvalid , getInvalidIdMessage } = require('./helpers/idHelpers.js')
 const { getCache, setCache, CheckRedis } = require('../../database/redisHelpers.js')
 const INVALID_ID_MESSAGE = getInvalidIdMessage()
+const redisIsReady = CheckRedis.isReady()
 
 const getAnswers = async (req, res) => {
   let question_id = parseInt(req.params.question_id)
@@ -18,36 +19,18 @@ const getAnswers = async (req, res) => {
 
   if(idIsInvalid(question_id)) return handleClientError(res, INVALID_ID_MESSAGE)
 
-  try {
-    if(CheckRedis.isReady()) /*REDIS IS CONNECTED*/ {
-      let redisAnswerKey = `question_id=${question_id}&count=${count}&page=${page}`;
-      const cache = await getCache(redisAnswerKey)
-      if(!!cache) {
-        handleGetResponse(res, JSON.parse(cache))
-      } else /*RESULT IS NOT CACHED*/ {
-        Answer.getAnswers(question_id, count, offset)
-          .then(async(results) => {
-            response.results = results.rows
-            await setCache(redisAnswerKey, response)
-            handleGetResponse(res, response)
-          })
-          .catch(err => {
-            handleError(res, err)
-          })
+  Answer.getAnswers(question_id, count, offset)
+    .then(async(results) => {
+      response.results = results.rows
+      if(redisIsReady) {
+        let { redisQuestionKey } = req
+        await setCache(redisAnswerKey, response)
       }
-    } else /*REDIS IS NOT CONNECTED*/ {
-      Answer.getAnswers(question_id, count, offset)
-      .then(results => {
-        response.results = results.rows
-        handleGetResponse(res, response)
-      })
-      .catch(err => {
-        handleError(res, err)
-      })
-    }
-  } catch(err) {
-    handleError(res, err)
-  }
+      handleGetResponse(res, response)
+    })
+    .catch(err => {
+      handleError(res, err)
+    })
 }
 
 
