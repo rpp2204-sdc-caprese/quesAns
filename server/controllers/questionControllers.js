@@ -1,5 +1,5 @@
 const Question = require('../../models/Question.js')
-const { handleGetResponse, handlePostResponse, handlePutResponse, handleClientError, handleError, } = require('./helpers/resHelpers.js')
+const { handleGetResponse, handlePostResponse, handlePutResponse, handleClientError, handleError } = require('./helpers/resHelpers.js')
 const { getCache, setCache, CheckRedis } = require('../../database/redisHelpers.js')
 const redisIsReady = CheckRedis.isReady()
 
@@ -20,7 +20,7 @@ const getQuestions = (req, res) => {
       }
       handleGetResponse(res, response)
     })
-    .catch(err => handleError(err))
+    .catch(err => handleError(res, err))
 }
 
 
