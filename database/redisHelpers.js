@@ -2,8 +2,8 @@ const redisClient = require('./redis.js')
 const SECONDS_TIL_EXPIRATION = 3600
 
 const Redis = {
-  isRedisReady: () => {
-    return redisClient.ping();
+  isRedisReady: async() => {
+    return await redisClient.ping();
   },
 
   getCache: async(key) => {
