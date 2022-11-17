@@ -19,7 +19,7 @@ const checkCache = async(req, res, next) => {
       next()
     }
   } catch(err) {
-    handleClientError(err)
+    handleClientError(res,err)
   }
 }
 
