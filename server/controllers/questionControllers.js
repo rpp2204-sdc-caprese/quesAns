@@ -4,7 +4,7 @@ const { setCache, isRedisReady } = require('../../database/redisHelpers.js')
 let redisIsReady = isRedisReady()
 
 
-const getQuestions = (req, res) => {
+const getQuestions = async(req, res) => {
   let { product_id } = req.query
   let count = req.query.count || 5
   let page = req.query.page || 1
