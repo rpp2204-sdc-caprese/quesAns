@@ -12,12 +12,12 @@ const pool = new Pool({
 })
 
 try {
-    pool.connect()
+    await pool.connect()
 } catch (err) {
     console.log(err)
 }
 
 module.exports = {
-  query: (text, params) => pool.query(text, params),
-  connect: () => pool.connect()
+  query: (text, params) => await pool.query(text, params),
+  connect: () => await pool.connect()
 }
