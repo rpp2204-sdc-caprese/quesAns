@@ -12,7 +12,7 @@ const pool = new Pool({
 })
 
 try {
-    await pool.connect()
+    pool.connect()
 } catch (err) {
     console.log(err)
 }
