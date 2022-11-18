@@ -1,6 +1,6 @@
 const { getCache, isRedisReady} = require('../../database/redisHelpers.js')
 const { handleGetResponse, handleClientError } = require('./helpers/resHelpers.js')
-let redisIsReady = isRedisReady()
+//let redisIsReady = isRedisReady()
 
 const checkCache = async(req, res, next) => {
   try {
