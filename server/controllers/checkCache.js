@@ -8,7 +8,7 @@ const checkCache = async(req, res, next) => {
     const count = req.query.count || 5
     const page = req.query.page || 1
     let redisQuestionKey = req.redisQuestionKey = `product_id=${product_id}&count=${count}&page=${page}`
-    if(redisIsReady) {
+    if(true) {
       const cache = await getCache(redisQuestionKey)
       if(!!cache) {
         handleGetResponse(res, JSON.parse(cache))
