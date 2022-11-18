@@ -9,18 +9,29 @@ const getQuestions = (req, res) => {
   let count = req.query.count || 5
   let page = req.query.page || 1
   let offset = (page - 1) * count
-  Question
-    .getQuestions(product_id, count, offset)
-    .then(async(results) => {
-      let response = { product_id }
-      response.results = results;
-      if(redisIsReady) {
-        let { redisQuestionKey } = req
-        await setCache(redisQuestionKey, response)
-      }
-      handleGetResponse(res, response)
-    })
-    .catch(err => handleError(res, err))
+
+  let response = { product_id }
+  try {
+    response.results = await Question.getQuestions(product_id, count, offset)
+    let { redisQuestionKey } = req
+    await setCache(redisQuestionKey, response)
+    handleGetResponse(res, response)
+  } catch(err) {
+    handleError(res, err)
+  }
+
+  // Question
+  //   .getQuestions(product_id, count, offset)
+  //   .then(async(results) => {
+  //     let response = { product_id }
+  //     response.results = results;
+  //     if(redisIsReady) {
+  //       let { redisQuestionKey } = req
+  //       await setCache(redisQuestionKey, response)
+  //     }
+  //     handleGetResponse(res, response)
+  //   })
+  //   .catch(err => handleError(res, err))
 }
 
 
