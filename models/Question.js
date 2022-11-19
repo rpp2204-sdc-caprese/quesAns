@@ -3,12 +3,12 @@ const QuesQuery = require('./queries/QuesQuery.js')
 
 const Question = {}
 
-Question.getQuestions = async(product_id, count, offset) => {
+Question.getQuestions = (product_id, count, offset) => {
   //const client = await pool.connect()
   let results = [];
   return pool
     .query(QuesQuery.select(), [product_id, count, offset])
-    .then((questions) => {
+    .then(async(questions) => {
       results = questions.rows
       for(let i = 0; i < results.length; i++) {
         for(let answer_id in results[i].answers) {
