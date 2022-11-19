@@ -14,7 +14,7 @@ const getQuestions = (req, res) => {
   Question
     .getQuestions(product_id, count, offset)
     .then((questions) => {
-      reponse.results = questions
+      response.results = questions
       let { redisQuestionKey } = req
       setCache(redisQuestionKey, response)
       handleGetResponse(res, response)
