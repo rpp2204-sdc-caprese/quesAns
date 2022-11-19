@@ -4,21 +4,36 @@ const { setCache, isRedisReady } = require('../../database/redisHelpers.js')
 let redisIsReady = isRedisReady()
 
 
-const getQuestions = async(req, res) => {
+const getQuestions = (req, res) => {
   let { product_id } = req.query
   let count = req.query.count || 5
   let page = req.query.page || 1
   let offset = (page - 1) * count
 
   let response = { product_id }
-  try {
-    response.results = await Question.getQuestions(product_id, count, offset)
-    let { redisQuestionKey } = req
-    await setCache(redisQuestionKey, response)
-    handleGetResponse(res, response)
-  } catch(err) {
-    handleError(res, err)
-  }
+  Question
+    .getQuestions(product_id, count, offset)
+    .then((questions) => {
+      reponse.results = questions
+      let { redisQuestionKey } = req
+      setCache(redisQuestionKey, response)
+      handleGetResponse(res, response)
+    })
+    .catch((err) => handleError(res, err))
+
+
+
+
+
+
+  // try {
+  //   response.results = await Question.getQuestions(product_id, count, offset)
+  //   let { redisQuestionKey } = req
+  //   await setCache(redisQuestionKey, response)
+  //   handleGetResponse(res, response)
+  // } catch(err) {
+  //   handleError(res, err)
+  // }
 
   // Question
   //   .getQuestions(product_id, count, offset)

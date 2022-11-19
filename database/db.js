@@ -18,6 +18,7 @@ try {
 }
 
 module.exports = {
-  query: async(text, params) => await pool.query(text, params),
+  query: (text, params) => pool.query(text, params),
+  queryAwait: async(text, params) => await pool.query(text, params)
   connect: async() => await pool.connect()
 }

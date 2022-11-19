@@ -7,7 +7,10 @@ const Redis = {
   },
 
   getCache: async(key) => {
-    return await redisClient.get(key)
+    return redisClient
+      .get(key)
+      .then(cache => cache)
+      .catch(err => err)
   },
 
   setCache: async(key, value) => {
