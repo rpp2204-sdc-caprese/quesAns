@@ -18,6 +18,7 @@ Question.getQuestions = (product_id, count, offset) => {
         }
       }
       return Promise.all(photo_promises)
+    })
     .then(photos => {
       let j = 0;
       for(let i = 0; i < results.length; i++) {
@@ -27,7 +28,6 @@ Question.getQuestions = (product_id, count, offset) => {
         }
       }
       return results
-    })
     })
     .catch((err) => err)
 
