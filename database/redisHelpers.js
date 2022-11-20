@@ -3,7 +3,7 @@ const SECONDS_TIL_EXPIRATION = 3600
 
 const Redis = {
   isRedisReady: async() => {
-    return await redisClient.ping();
+    return redisClient.ping();
   },
 
   getCache: async(key) => {
