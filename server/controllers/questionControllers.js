@@ -15,8 +15,8 @@ const getQuestions = (req, res) => {
     .getQuestions(product_id, count, offset)
     .then((questions) => {
       response.results = questions
-      //let { redisQuestionKey } = req
-      //setCache(redisQuestionKey, response)
+      let { redisQuestionKey } = req
+      setCache(redisQuestionKey, response)
       handleGetResponse(res, response)
     })
     .catch((err) => handleError(res, err))
