@@ -14,7 +14,7 @@ const checkCache = async(req, res, next) => {
         if(cache) handleGetResponse(res, JSON.parse(cache))
         else next()
       })
-      .catch(err => next()) //if redis is not connected and error is caught, proceed to question Controller
+      .catch((err) => handleError(res, err)) //if redis is not connected and error is caught, proceed to question Controller
 
 
 
