@@ -14,7 +14,6 @@ Question.getQuestions = (product_id, count, offset) => {
       for(let i = 0; i < results.length; i++) {
         for(let answer_id in results[i].answers) {
           photo_promises.push(pool.query(QuesQuery.selectPhotos(), [answer_id]))
-          //results[i].answers[answer_id].photos = photo_urls.rows[0].photos
         }
       }
       return Promise.all(photo_promises)
