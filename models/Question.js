@@ -8,7 +8,7 @@ Question.getQuestions = (product_id, count, offset) => {
   let results = [];
   return pool
     .query(QuesQuery.select(), [product_id, count, offset])
-    .then(async(questions) => {
+    .then((questions) => {
       results = questions.rows
       let photo_promises = []
       for(let i = 0; i < results.length; i++) {
