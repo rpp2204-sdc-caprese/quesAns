@@ -6,7 +6,7 @@ const redisClient = Redis.createClient({
   url: URL
 })
 
-redisClient.on('error', (err) => console.log('Redis Client Error', err))
+//redisClient.on('error', (err) => console.log('Redis Client Error', err))
 
 redisClient.connect()
   .then(() => {
