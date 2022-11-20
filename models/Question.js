@@ -26,8 +26,8 @@ Question.getQuestions = (product_id, count, offset) => {
           j++
         }
       }
-    })
       return results
+    })
     })
     .catch((err) => err)
 
