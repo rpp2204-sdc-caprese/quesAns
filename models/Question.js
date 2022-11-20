@@ -17,12 +17,12 @@ Question.getQuestions = (product_id, count, offset) => {
           //results[i].answers[answer_id].photos = photo_urls.rows[0].photos
         }
       }
-      return Promise.all(photos_promises)
+      return Promise.all(photo_promises)
     .then(photos => {
       let j = 0;
       for(let i = 0; i < results.length; i++) {
         for(let answer_id in results[i].answers) {
-          results[i].answers[answer_id].photos = photo[j]
+          results[i].answers[answer_id].photos = photos[j]
           j++
         }
       }
