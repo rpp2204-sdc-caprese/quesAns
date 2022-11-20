@@ -23,7 +23,7 @@ Question.getQuestions = (product_id, count, offset) => {
       let j = 0;
       for(let i = 0; i < results.length; i++) {
         for(let answer_id in results[i].answers) {
-          results[i].answers[answer_id].photos = photos[j]
+          results[i].answers[answer_id].photos = photos[j].rows[0].photos
           j++
         }
       }
