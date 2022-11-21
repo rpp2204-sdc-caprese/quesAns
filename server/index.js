@@ -20,11 +20,11 @@ app.use(morgan('combined', config))
 
 /****ROUTES****/
 app.route('/qa/questions')
-  .get(validateId, getQuestions)
+  .get(validateId, checkCache, getQuestions)
   .post(validateId, postQuestion)
 
 app.route('/qa/questions/:question_id/answers')
-  .get(validateId, getAnswers)
+  .get(validateId, checkCache, getAnswers)
   .post(validateId, postAnswer)
 
 app.put('/qa/questions/:question_id/helpful', validateId,  updateQuestionHelpfulness)
