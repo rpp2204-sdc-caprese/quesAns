@@ -1,7 +1,6 @@
 const Answer = require('../../models/Answer.js')
 const { handleGetResponse, handlePostResponse, handlePutResponse, handleClientError, handleError } = require('./helpers/resHelpers.js')
-const { setCache, isRedisReady } = require('../../database/redisHelpers.js')
-let redisIsReady = isRedisReady()
+const { setCache } = require('../../database/redisHelpers.js')
 
 
 const getAnswers = (req, res) => {
@@ -15,10 +14,8 @@ const getAnswers = (req, res) => {
     .then(async(results) => {
       let response = { question: question_id, page, count }
       response.results = results.rows
-      if(redisIsReady) {
-        let { redisQuestionKey } = req
-        await setCache(redisAnswerKey, response)
-      }
+      let { redisQuestionKey } = req
+      await setCache(redisAnswerKey, response)
       handleGetResponse(res, response)
     })
     .catch(err => handleError(res, err))
