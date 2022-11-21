@@ -19,13 +19,12 @@ app.use(express.urlencoded({extended: true}))
 app.use(morgan('combined', config))
 
 /****ROUTES****/
-app.get('/qa/questions', checkCache, getQuestions)
-// app.route('/qa/questions')
-//   .get(validateId, checkCache, getQuestions)
-//   .post(validateId, postQuestion)
+app.route('/qa/questions')
+  .get(validateId, getQuestions)
+  .post(validateId, postQuestion)
 
 app.route('/qa/questions/:question_id/answers')
-  .get(validateId, checkCache, getAnswers)
+  .get(validateId, getAnswers)
   .post(validateId, postAnswer)
 
 app.put('/qa/questions/:question_id/helpful', validateId,  updateQuestionHelpfulness)
