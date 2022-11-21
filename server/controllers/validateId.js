@@ -5,8 +5,7 @@ const idIsInvalid = (id) => id === undefined || id <= 0 || isNaN(id)
 
 const validateId = (req, res, next) => {
   let id = req.query.product_id || req.params.question_id || req.params.answer_id
-  let intId = parseInt(id)
-  if(idIsInvalid(intId)) return handleClientError(res, INVALID_ID_MESSAGE)
+  if(idIsInvalid(Number(id))) return handleClientError(res, INVALID_ID_MESSAGE)
   else next()
 }
 
