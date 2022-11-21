@@ -1,4 +1,5 @@
 const pool = require('../database/db.js');
+const { clientBegin, clientQuery, clientCommit, clientRollback, clientRelease } = require('../database/db.js')
 const AnsQuery = require('./queries/AnsQuery.js')
 
 
@@ -11,21 +12,21 @@ Answer.getAnswers = (question_id, count, offset) => {
 Answer.addNewAnswer = async(values, photos) => {
   const client = await pool.connect()
   try {
-    await client.query('BEGIN')
-    let result = await client.query(AnsQuery.insert(), values)
+    await clientBegin(client)
+    let result = await clientQuery(client, AnsQuery.insert(), values)
     let answer_id = result.rows[0].id
     let photoQueries = []
     for(let i = 0; i < photos.length; i++) {
-      photoQueries.push(client.query(AnsQuery.insertPhotos(), [answer_id, photos[i]]))
+      photoQueries.push(clientQuery(client, AnsQuery.insertPhotos(), [answer_id, photos[i]]))
     }
     await Promise.all(photoQueries)
-    await client.query('COMMIT')
+    await clientCommit(client)
   } catch(err) {
-    await client.query('ROLLBACK')
+    await clientRollback(client)
     console.error('There was an error during database transaction')
     return err;
   } finally {
-    client.release();
+    clientRelease(client);
   }
 }
 
