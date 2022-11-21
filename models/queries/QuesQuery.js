@@ -39,9 +39,9 @@ return `
     $3`;
 }
 
-QuesQuery.selectPhotos = () => {
-  return `SELECT COALESCE(array_agg(url), '{}') AS photos FROM answers_photos WHERE answer_id = $1`;
-}
+// QuesQuery.selectPhotos = () => {
+//   return `SELECT COALESCE(array_agg(url), '{}') AS photos FROM answers_photos WHERE answer_id = $1`;
+// }
 
 QuesQuery.insert = () => {
   return `INSERT INTO questions(product_id, body, date_written, asker_name, asker_email, reported, helpful) values($1, $2, $3, $4, $5, $6, $7)`;
