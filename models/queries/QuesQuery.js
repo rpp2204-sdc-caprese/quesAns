@@ -14,7 +14,7 @@ return `
       'body', a.body,
       'date', a.date_written,
       'answerer_name', a.answerer_name,
-      'helpfulness', a.helpful
+      'helpfulness', a.helpful,
       'photos', (SELECT COALESCE(array_agg(url), '{}') FROM answers_photos WHERE answer_id = a.id)
     ))
     FILTER (where a.id is not null), '{}') AS answers
@@ -27,7 +27,7 @@ return `
   AND
     a.reported = FALSE
   WHERE
-    q.product_id = $1
+    q.product_id = 1
   AND
     q.reported = FALSE
   GROUP BY q.id
