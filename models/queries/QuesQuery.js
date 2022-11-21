@@ -27,7 +27,7 @@ return `
   AND
     a.reported = FALSE
   WHERE
-    q.product_id = 1
+    q.product_id = $1
   AND
     q.reported = FALSE
   GROUP BY q.id
