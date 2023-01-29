@@ -6,8 +6,12 @@ const redisClient = Redis.createClient({
   url: URL
 })
 
+//redisClient.on('error', (err) => console.log('Redis Client Error', err))
+
 redisClient.connect()
-  .then(() => console.log('Redis is connected'))
+  .then(() => {
+    console.log('Redis is connected')
+  })
   .catch(err => {
     if(err.message === 'Connection timeout') {
       console.log('Redis: ' + err.message)

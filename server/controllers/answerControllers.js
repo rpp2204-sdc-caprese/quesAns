@@ -1,128 +1,57 @@
-const {
-  handleGetResponse,
-  handlePostResponse,
-  handlePutResponse,
-  handleClientError,
-  handleError,
-  idIsInvalid
-} = require('./resHelpers.js')
-
-const {
-  SELECT_ANSWERS_TEXT,
-  INSERT_ANSWER_TEXT,
-  INSERT_PHOTOS_TEXT,
-  UPDATE_ANSWERS_HELPFULNESS_TEXT,
-  UPDATE_ANSWERS_REPORTED_TEXT
-} = require('../../database/queries/queriesAnswers.js')
-
-const { getCache, setCache } = require('../../database/redisHelpers.js')
-const pool = require('../../database/db.js')
+const Answer = require('../../models/Answer.js')
+const { handleGetResponse, handlePostResponse, handlePutResponse, handleClientError, handleError } = require('./helpers/resHelpers.js')
+const { setCache } = require('../../database/redisHelpers.js')
 
 
-const getAnswers = async (req, res) => {
-  let question_id = parseInt(req.params.question_id)
+const getAnswers = (req, res) => {
+  let { question_id } = req.params
   let count = req.query.count || 5
   let page = req.query.page || 1
+  let offset = (page - 1) * count
 
-  if(idIsInvalid(question_id)) return handleClientError(res, 'MUST HAVE VALID QUESTION ID')
+  Answer
+    .getAnswers(question_id, count, offset)
+    .then(async(results) => {
+      let response = { question: question_id, page, count }
+      response.results = results.rows
+      let { redisQuestionKey } = req
+      await setCache(redisAnswerKey, response)
+      handleGetResponse(res, response)
+    })
+    .catch(err => handleError(res, err))
+}
+
+
+const postAnswer = async(req, res) => {
+  let { question_id } = req.params
+  let { body, name, email, rawPhotos } = req.body.data //Data from answer POST is in data property of req.body
+  let date_written = new Date().toISOString()
+  let reported = false
+  let helpful = 0
 
   try {
-    let redisAnswerKey = `question_id=${question_id}&count=${count}&page=${page}`;
-    const cache = await getCache(redisAnswerKey)
-    if(!!cache) {
-      handleGetResponse(res, JSON.parse(cache))
-    } else {
-      let offset = (page - 1) * count
-      const SELECT_ANSWERS = {
-        text: SELECT_ANSWERS_TEXT,
-        values: [question_id, count, offset]
-      }
-
-      pool
-        .query(SELECT_ANSWERS)
-        .then(async(results) => {
-          let response = {
-            question: question_id,
-            page: page,
-            count: count,
-          }
-          response.results = results.rows
-          await setCache(redisAnswerKey, response)
-          handleGetResponse(res, response)
-        })
-        .catch(err => {
-          handleError(res, err)
-        })
-    }
+    let values = [question_id, body, date_written, name, email, reported, helpful]
+    await Answer.addNewAnswer(values, rawPhotos)
+    handlePostResponse(res)
   } catch(err) {
     handleError(res, err)
   }
 }
 
 
-const postAnswer = async(req, res) => {
-  let question_id = parseInt(req.params.question_id)
-  let { body, name, email, rawPhotos } = req.body.data //Data from answer POST is in data property of req.body
-  let photos = rawPhotos
-  let date_written = new Date().toISOString()
-  let reported = false
-  let helpful = 0
-
-  if(idIsInvalid(question_id)) return handleClientError(res, 'MUST HAVE VALID QUESTION ID')
-
-  const client = await pool.connect()
-  try {
-    await client.query('BEGIN')
-    const INSERT_ANSWER = {
-      text: INSERT_ANSWER_TEXT,
-      values: [question_id, body, date_written, name, email, reported, helpful]
-    }
-    let result = await client.query(INSERT_ANSWER)
-    let answer_id = result.rows[0].id
-    let photoQueries = []
-    for(let i = 0; i < photos.length; i++) {
-      const INSERT_PHOTOS = {
-        text: INSERT_PHOTOS_TEXT,
-        values: [answer_id, photos[i]]
-      }
-      photoQueries.push(client.query(INSERT_PHOTOS))
-    }
-
-    await Promise.all(photoQueries)
-    await client.query('COMMIT')
-    handlePostResponse(res)
-  } catch(err) {
-    await client.query('ROLLBACK')
-    console.log(err)
-  } finally {
-    client.release()
-  }
-}
-
-
 const updateAnswerHelpfulness = (req, res) => {
-  let answer_id = parseInt(req.params.answer_id)
-  if(idIsInvalid(answer_id)) return handleClientError(res, 'MUST HAVE VALID ANSWER ID')
-  const UPDATE_ANSWERS_HELPFULNESS = {
-    text: UPDATE_ANSWERS_HELPFULNESS_TEXT,
-    values: [answer_id]
-  }
-  pool
-    .query(UPDATE_ANSWERS_HELPFULNESS)
+  let { answer_id } = req.params
+  Answer
+    .markAnswerAsHelpful(answer_id)
     .then(() => handlePutResponse(res))
     .catch(err => handleError(res, err))
 }
 
 
 const reportAnswer = (req, res) => {
-  let answer_id = parseInt(req.params.answer_id)
-  if(idIsInvalid(answer_id)) return handleClientError(res, 'MUST HAVE VALID ANSWER ID')
-  const UPDATE_ANSWERS_REPORTED = {
-    text: UPDATE_ANSWERS_REPORTED_TEXT,
-    values: [answer_id]
-  }
-  pool
-    .query(UPDATE_ANSWERS_REPORTED)
+  let { answer_id } = req.params
+  Answer
+    .reportAnswer(answer_id)
     .then(() => handlePutResponse(res))
     .catch(err => handleError(res, err))
 }

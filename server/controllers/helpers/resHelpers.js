@@ -7,13 +7,11 @@ const handleError = (res, err) => {
   console.log(err)
   res.status(500).send(err)
 }
-const idIsInvalid = (id) => id === undefined || id < 0 || isNaN(id)
 
 module.exports = {
   handleGetResponse,
   handlePostResponse,
   handlePutResponse,
   handleClientError,
-  handleError,
-  idIsInvalid
+  handleError
 }
