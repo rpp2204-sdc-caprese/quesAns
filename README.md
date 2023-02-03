@@ -11,3 +11,12 @@ This project transformed a monolithic backend of e-commerce website into scalabl
 # Initial Testing metrics for GET /questions
 </br>
 <img src="loaderio_CPS_300.png" />
+</br>
+300 requests / second @ 2036 ms latency
+</br>
+
+# Metrics for GET /questions after NGINX load balancer and Redis cache
+</br>
+<img src="cps_3500_redis.png" />
+</br>
+3500 requests / second @ 7 ms latency
