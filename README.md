@@ -7,3 +7,7 @@ This project transformed a monolithic backend of e-commerce website into scalabl
 • Used New Relic and loader.io to identify bottlenecks </br>
 • Optimized database performance by consolidating three separate SQL queries into a single query using aggregate functions </br>
 • Achieved 3500 RPS at 7ms response time
+
+# Initial Testing metrics for GET /questions
+</br>
+<img src="loaderio_CPS_300.png" />
