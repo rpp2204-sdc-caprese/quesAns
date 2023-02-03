@@ -1,5 +1,5 @@
 # Questions / Answers Microservice
-This project transformed a monolithic backend of e-commerce website into scalable question/answer microservice
+This project transformed a monolithic backend of the Atelier e-commerce website into a scalable question/answer microservice
 </br>
 • Set up ETL pipeline using PostgreSQL for legacy data of 30 million records </br>
 • Implemented RESTful API </br>
