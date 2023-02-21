@@ -1,42 +1,52 @@
 const QuesQuery = {}
 
 QuesQuery.select = () => {
-return `
-  SELECT
-    q.id AS question_id,
-    q.body AS question_body,
-    q.date_written AS question_date,
-    q.asker_name,
-    q.helpful AS question_helpfulness,
-    q.reported,
-    COALESCE(json_object_agg(a.id, json_build_object(
-      'id', a.id,
-      'body', a.body,
-      'date', a.date_written,
-      'answerer_name', a.answerer_name,
-      'helpfulness', a.helpful,
-      'photos', (SELECT COALESCE(array_agg(url), '{}') FROM answers_photos WHERE answer_id = a.id)
-    ))
-    FILTER (where a.id is not null), '{}') AS answers
-  FROM
-    questions q
-  LEFT JOIN
-    answers a
-  ON
-    a.question_id = q.id
-  AND
-    a.reported = FALSE
-  WHERE
-    q.product_id = $1
-  AND
-    q.reported = FALSE
-  GROUP BY q.id
-  ORDER BY
-    q.id
-  LIMIT
-    $2
-  OFFSET
-    $3`;
+  /**
+   * This query selects the question data, the associated answer data, and the associated answer photos
+   *
+   * Coalesce: Returns first non-null value in list
+   * Json_object_agg: Aggregates name/value pairs as JSON object; values can be null, names can not
+   * Json_build_object: Builds JSON object out of argument list (alternating key/values)
+   * Array_agg: input values including nulls concatenated into an array
+   * Filter: I think because I did not pass alternate non-null valure to coalesce? TODO: play with query to see if filter is necessary
+   */
+
+  return `
+    SELECT
+      q.id AS question_id,
+      q.body AS question_body,
+      q.date_written AS question_date,
+      q.asker_name,
+      q.helpful AS question_helpfulness,
+      q.reported,
+      COALESCE(json_object_agg(a.id, json_build_object(
+        'id', a.id,
+        'body', a.body,
+        'date', a.date_written,
+        'answerer_name', a.answerer_name,
+        'helpfulness', a.helpful,
+        'photos', (SELECT COALESCE(array_agg(url), '{}') FROM answers_photos WHERE answer_id = a.id)
+      ))
+      FILTER (where a.id is not null), '{}') AS answers
+    FROM
+      questions q
+    LEFT JOIN
+      answers a
+    ON
+      a.question_id = q.id
+    AND
+      a.reported = FALSE
+    WHERE
+      q.product_id = $1
+    AND
+      q.reported = FALSE
+    GROUP BY q.id
+    ORDER BY
+      q.id
+    LIMIT
+      $2
+    OFFSET
+      $3`;
 }
 
 QuesQuery.insert = () => {
