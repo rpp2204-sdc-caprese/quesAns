@@ -8,6 +8,11 @@ This project transformed a monolithic backend of the Atelier e-commerce website 
 • Optimized database performance by consolidating three separate SQL queries into a single query using aggregate functions </br>
 • Achieved 3500 RPS at 7ms response time
 
+# System Architecture
+</br>
+<img src="NickHays_SDC_Diagram.001.png" />
+</br>
+
 # Initial Testing metrics for GET /questions
 </br>
 <img src="loaderio_CPS_300.png" />
